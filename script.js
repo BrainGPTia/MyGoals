@@ -4,22 +4,19 @@ let myLikes = [];
 let myComments = [];
 let currentGoalId = null;
 let currentUser = 'Utilisateur';
-
-// Initialisation Firebase Analytics
-const analytics = firebase.analytics();
+let analytics = null;
 
 // Charger les données au démarrage
 window.addEventListener('DOMContentLoaded', () => {
+    // Initialiser Firebase Analytics si disponible
+    if (typeof firebase !== 'undefined' && firebase.analytics) {
+        analytics = firebase.analytics();
+    }
+    
     loadData();
     setupEventListeners();
     renderGoals();
 });
-
-// Rendre les fonctions globales pour onclick
-window.openModal = openModal;
-window.deleteGoal = deleteGoal;
-window.toggleLike = toggleLike;
-window.submitComment = submitComment;
 
 // Configuration des écouteurs d'événements
 function setupEventListeners() {
@@ -83,7 +80,7 @@ function setupEventListeners() {
 
     document.getElementById('themeSelect').addEventListener('change', (e) => {
         document.body.className = e.target.value;
-        saveData();
+        saveSettings();
     });
 
     document.querySelectorAll('.color-btn').forEach(btn => {
@@ -91,7 +88,7 @@ function setupEventListeners() {
             e.preventDefault();
             const color = btn.dataset.color;
             document.documentElement.style.setProperty('--primary', color);
-            saveData();
+            saveSettings();
         });
     });
 
@@ -200,7 +197,9 @@ function saveGoal(e) {
     } else {
         goals.push(goal);
         // Analytics: suivi nouvel objectif
-        analytics.logEvent('add_goal', { title, visibility });
+        if (analytics) {
+            analytics.logEvent('add_goal', { title, visibility });
+        }
     }
     
     saveData();
@@ -230,7 +229,9 @@ function toggleLike(id) {
         myLikes.push(id);
         goal.likes++;
         // Analytics: suivi like
-        analytics.logEvent('like_goal', { goalId: id });
+        if (analytics) {
+            analytics.logEvent('like_goal', { goalId: id });
+        }
     }
     
     saveData();
@@ -252,7 +253,9 @@ function addComment(goalId, text) {
     goal.comments.push(comment);
     myComments.push(comment);
     // Analytics: suivi commentaire
-    analytics.logEvent('comment_goal', { goalId });
+    if (analytics) {
+        analytics.logEvent('comment_goal', { goalId });
+    }
     saveData();
     renderGoals();
 }
@@ -368,10 +371,10 @@ function createGoalCard(goal, isPublic) {
                 </div>
             </div>
             <div class="goal-actions">
-                <button class="btn btn-primary" onclick="window.openModal('${goal.id}')">✏️ Modifier</button>
-                <button class="btn btn-danger" onclick="window.deleteGoal('${goal.id}')">🗑️ Supprimer</button>
+                <button class="btn btn-primary" onclick="openModal('${goal.id}')">✏️ Modifier</button>
+                <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">🗑️ Supprimer</button>
                 ${isPublic ? `
-                    <button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="window.toggleLike('${goal.id}')">
+                    <button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${goal.id}')">
                         ${isLiked ? '❤️' : '🤍'} ${goal.likes}
                     </button>
                 ` : ''}
@@ -387,7 +390,7 @@ function createGoalCard(goal, isPublic) {
                     `).join('')}
                     <div class="comment-form">
                         <input type="text" class="comment-input" placeholder="Ajouter un commentaire..." data-goal="${goal.id}">
-                        <button class="btn btn-primary" onclick="window.submitComment('${goal.id}')">💬</button>
+                        <button class="btn btn-primary" onclick="submitComment('${goal.id}')">💬</button>
                     </div>
                 </div>
             ` : ''}
@@ -447,4 +450,8 @@ function loadData() {
             document.documentElement.style.setProperty('--primary', data.primaryColor);
         }
     }
+}
+
+function saveSettings() {
+    saveData();
 }
