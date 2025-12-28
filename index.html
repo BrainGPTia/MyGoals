@@ -181,3 +181,149 @@
     <script src="script.js"></script>
 </body>
 </html>
+        <!-- Section: Check-in Quotidien -->
+        <section id="check-in" class="section">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Check-in du jour</h2>
+                <div class="form-group">
+                    <label>Sélectionner un objectif</label>
+                    <select id="checkin-goal-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>Où j'en suis aujourd'hui</label>
+                    <textarea id="checkin-note" placeholder="Décrivez votre progression..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ajuster le pourcentage</label>
+                    <input type="range" id="checkin-progress" min="0" max="100" value="0" class="progress-slider">
+                    <div class="progress-label">
+                        <span>Progression</span>
+                        <span id="checkin-progress-value">0%</span>
+                    </div>
+                </div>
+                <button class="btn" id="btn-save-checkin">
+                    <i class="fas fa-check"></i> Enregistrer le check-in
+                </button>
+            </div>
+
+            <div id="checkin-history"></div>
+        </section>
+    </div>
+
+    <!-- Modal: Créer/Modifier Objectif -->
+    <div id="modal-goal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-goal-title">Créer un objectif</h2>
+                <button class="modal-close" id="modal-goal-close">×</button>
+            </div>
+
+            <form id="goal-form">
+                <input type="hidden" id="goal-id">
+                
+                <div class="form-group">
+                    <label>Titre de l'objectif *</label>
+                    <input type="text" id="goal-title" required placeholder="Ex: Apprendre le piano">
+                </div>
+
+                <div class="form-group">
+                    <label>Description (optionnelle)</label>
+                    <textarea id="goal-description" placeholder="Détails de votre objectif..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Type d'objectif *</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="goal-type" id="type-jour" value="jour" checked>
+                            <label for="type-jour">Jour</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="goal-type" id="type-semaine" value="semaine">
+                            <label for="type-semaine">Semaine</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="goal-type" id="type-mois" value="mois">
+                            <label for="type-mois">Mois</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="goal-type" id="type-annee" value="année">
+                            <label for="type-annee">Année</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Progression actuelle</label>
+                    <input type="range" id="goal-progress" min="0" max="100" value="0" class="progress-slider">
+                    <div class="progress-label">
+                        <span>0%</span>
+                        <span id="goal-progress-value">0%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Visibilité *</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="goal-visibility" id="visibility-prive" value="privé" checked>
+                            <label for="visibility-prive">Privé</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="goal-visibility" id="visibility-public" value="public">
+                            <label for="visibility-public">Public</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nom affiché (si public) *</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="goal-display-name" id="display-nom" value="nom" checked>
+                            <label for="display-nom">Nom</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="goal-display-name" id="display-pseudo" value="pseudo">
+                            <label for="display-pseudo">Pseudo</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="goal-display-name" id="display-anonyme" value="anonyme">
+                            <label for="display-anonyme">Anonyme</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" id="goal-user-name" placeholder="Votre nom ou pseudo">
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="goal-allow-comments" checked>
+                        <label for="goal-allow-comments">Autoriser les commentaires (si public)</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Détails Objectif -->
+    <div id="modal-goal-details" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Détails de l'objectif</h2>
+                <button class="modal-close" id="modal-details-close">×</button>
+            </div>
+            <div id="goal-details-content"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
