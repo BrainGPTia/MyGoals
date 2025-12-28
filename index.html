@@ -3,13 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker d'Objectifs</title>
+    <title>MyGoals - Tracker d'Objectifs</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Config Firebase (remplace les valeurs par les tiennes)
+        const firebaseConfig = {
+            apiKey: "TON_API_KEY",
+            authDomain: "TON_PROJET.firebaseapp.com",
+            projectId: "TON_PROJET",
+            storageBucket: "TON_PROJET.appspot.com",
+            messagingSenderId: "TON_ID",
+            appId: "TON_APP_ID",
+            measurementId: "TON_MEASUREMENT_ID"
+        };
+
+        // Initialisation Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const analytics = firebase.analytics();
+
+        // Suivi page view
+        analytics.logEvent('page_view', { page: 'home' });
+    </script>
 </head>
 <body>
     <header>
         <div class="header-content">
-            <h1>🎯 Mes Objectifs</h1>
+            <h1>🎯 MyGoals</h1>
             <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
         </div>
     </header>
@@ -34,6 +60,40 @@
         <section id="privateSection" class="goals-section">
             <div id="privateGoals" class="goals-grid"></div>
         </section>
+
+        <section id="commentsSection" class="goals-section">
+            <div id="myComments" class="goals-grid"></div>
+        </section>
+
+        <section id="likesSection" class="goals-section">
+            <div id="myLikes" class="goals-grid"></div>
+        </section>
+    </main>
+
+    <!-- Modal Objectif -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">✨ Nouvel Objectif</h2>
+            <form id="goalForm">
+                <!-- Formulaire identique à ton précédent code -->
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Paramètres -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSettings">&times;</span>
+            <h2>⚙️ Paramètres</h2>
+            <!-- Form paramètres identique -->
+        </div>
+    </div>
+
+    <!-- Script principal -->
+    <script src="script.js"></script>
+</body>
+</html>
 
         <section id="commentsSection" class="goals-section">
             <div id="myComments" class="goals-grid"></div>
