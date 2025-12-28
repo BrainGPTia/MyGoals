@@ -15,6 +15,12 @@ window.addEventListener('DOMContentLoaded', () => {
     renderGoals();
 });
 
+// Rendre les fonctions globales pour onclick
+window.openModal = openModal;
+window.deleteGoal = deleteGoal;
+window.toggleLike = toggleLike;
+window.submitComment = submitComment;
+
 // Configuration des écouteurs d'événements
 function setupEventListeners() {
     // Navigation principale
@@ -104,6 +110,8 @@ function openModal(goalId = null) {
     
     if (goalId) {
         const goal = goals.find(g => g.id === goalId);
+        if (!goal) return;
+        
         document.getElementById('modalTitle').textContent = '✏️ Modifier l\'objectif';
         document.getElementById('goalTitle').value = goal.title;
         document.getElementById('goalDescription').value = goal.description;
@@ -120,10 +128,17 @@ function openModal(goalId = null) {
             if (goal.displayName === 'pseudo') {
                 document.getElementById('pseudoInput').style.display = 'block';
                 document.getElementById('pseudoInput').value = goal.authorName;
+                document.getElementById('realNameInput').style.display = 'none';
             } else if (goal.displayName === 'real') {
                 document.getElementById('realNameInput').style.display = 'block';
                 document.getElementById('realNameInput').value = goal.authorName;
+                document.getElementById('pseudoInput').style.display = 'none';
+            } else {
+                document.getElementById('pseudoInput').style.display = 'none';
+                document.getElementById('realNameInput').style.display = 'none';
             }
+        } else {
+            document.getElementById('publicOptions').style.display = 'none';
         }
     } else {
         document.getElementById('modalTitle').textContent = '✨ Nouvel Objectif';
@@ -266,12 +281,15 @@ function showSection(section) {
 }
 
 function renderGoals() {
-    const activeSection = document.querySelector('.goals-section.active').id;
+    const activeSection = document.querySelector('.goals-section.active');
+    if (!activeSection) return;
     
-    if (activeSection === 'publicSection') renderPublicGoals();
-    else if (activeSection === 'privateSection') renderPrivateGoals();
-    else if (activeSection === 'commentsSection') renderMyComments();
-    else if (activeSection === 'likesSection') renderMyLikes();
+    const activeSectionId = activeSection.id;
+    
+    if (activeSectionId === 'publicSection') renderPublicGoals();
+    else if (activeSectionId === 'privateSection') renderPrivateGoals();
+    else if (activeSectionId === 'commentsSection') renderMyComments();
+    else if (activeSectionId === 'likesSection') renderMyLikes();
 }
 
 function renderPublicGoals() {
@@ -334,12 +352,12 @@ function createGoalCard(goal, isPublic) {
         <div class="goal-card">
             <div class="goal-header">
                 <div>
-                    <div class="goal-title">${goal.title}</div>
-                    ${isPublic ? `<small style="color: var(--text-light);">Par ${goal.authorName}</small>` : ''}
+                    <div class="goal-title">${escapeHtml(goal.title)}</div>
+                    ${isPublic ? `<small style="color: var(--text-light);">Par ${escapeHtml(goal.authorName)}</small>` : ''}
                 </div>
                 <span class="goal-type">${typeLabels[goal.type]}</span>
             </div>
-            ${goal.description ? `<div class="goal-description">${goal.description}</div>` : ''}
+            ${goal.description ? `<div class="goal-description">${escapeHtml(goal.description)}</div>` : ''}
             <div class="progress-container">
                 <div class="progress-label">
                     <span>Progression</span>
@@ -350,10 +368,10 @@ function createGoalCard(goal, isPublic) {
                 </div>
             </div>
             <div class="goal-actions">
-                <button class="btn btn-primary" onclick="openModal('${goal.id}')">✏️ Modifier</button>
-                <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">🗑️ Supprimer</button>
+                <button class="btn btn-primary" onclick="window.openModal('${goal.id}')">✏️ Modifier</button>
+                <button class="btn btn-danger" onclick="window.deleteGoal('${goal.id}')">🗑️ Supprimer</button>
                 ${isPublic ? `
-                    <button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${goal.id}')">
+                    <button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="window.toggleLike('${goal.id}')">
                         ${isLiked ? '❤️' : '🤍'} ${goal.likes}
                     </button>
                 ` : ''}
@@ -363,13 +381,13 @@ function createGoalCard(goal, isPublic) {
                     <h4>💬 Commentaires (${goal.comments.length})</h4>
                     ${goal.comments.map(c => `
                         <div class="comment">
-                            <div class="comment-author">${c.author}</div>
-                            <div class="comment-text">${c.text}</div>
+                            <div class="comment-author">${escapeHtml(c.author)}</div>
+                            <div class="comment-text">${escapeHtml(c.text)}</div>
                         </div>
                     `).join('')}
                     <div class="comment-form">
                         <input type="text" class="comment-input" placeholder="Ajouter un commentaire..." data-goal="${goal.id}">
-                        <button class="btn btn-primary" onclick="submitComment('${goal.id}')">💬</button>
+                        <button class="btn btn-primary" onclick="window.submitComment('${goal.id}')">💬</button>
                     </div>
                 </div>
             ` : ''}
@@ -393,6 +411,12 @@ function attachGoalEventListeners() {
             }
         });
     });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function saveData() {
