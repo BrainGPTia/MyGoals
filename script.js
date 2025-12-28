@@ -1,39 +1,296 @@
-/***********************
- * FIREBASE CONFIG
- ***********************/
-const firebaseConfig = {
-  apiKey: "TA_API_KEY",
-  authDomain: "TON_PROJET.firebaseapp.com",
-  projectId: "TON_PROJECT_ID",
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/***********************
- * ÉTAT DE L'APP
- ***********************/
-let goals = [];          // PRIVÉS (local)
-let publicGoals = [];    // PUBLICS (Firestore)
+// État de l'application
+let goals = [];
 let myLikes = [];
 let myComments = [];
 let currentGoalId = null;
 let currentUser = 'Utilisateur';
 
-/***********************
- * INIT
- ***********************/
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "TON_API_KEY",
+    authDomain: "TON_PROJET.firebaseapp.com",
+    projectId: "TON_PROJET",
+    storageBucket: "TON_PROJET.appspot.com",
+    messagingSenderId: "TON_ID",
+    appId: "TON_APP_ID",
+    measurementId: "TON_MEASUREMENT_ID"
+};
+
+// Initialiser Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const analytics = firebase.analytics();
+
+// Suivi page view
+analytics.logEvent('page_view', { page: 'home' });
+
+// Charger les données au démarrage
 window.addEventListener('DOMContentLoaded', () => {
-  loadLocalData();
-  setupEventListeners();
-  listenPublicGoals();
-  renderGoals();
+    loadData();
+    setupEventListeners();
+    renderGoals();
 });
 
-/***********************
- * FIRESTORE
- ***********************/
-function listenPublicGoals() {
+// Configuration des écouteurs d'événements
+function setupEventListeners() {
+    // Navigation principale
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            showSection(btn.dataset.section);
+        });
+    });
+
+    // Navigation secondaire
+    document.querySelectorAll('.secondary-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            showSection(btn.dataset.section);
+        });
+    });
+
+    // Bouton nouvel objectif
+    document.getElementById('addGoalBtn').addEventListener('click', () => openModal());
+
+    // Fermeture modale
+    document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', closeModals);
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', closeModals);
+
+    // Soumission formulaire
+    document.getElementById('goalForm').addEventListener('submit', saveGoal);
+
+    // Slider progression
+    document.getElementById('goalProgress').addEventListener('input', (e) => {
+        document.getElementById('progressValue').textContent = e.target.value;
+    });
+
+    // Visibilité publique/privée
+    document.querySelectorAll('input[name="visibility"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const publicOptions = document.getElementById('publicOptions');
+            publicOptions.style.display = e.target.value === 'public' ? 'block' : 'none';
+        });
+    });
+
+    // Nom affiché
+    document.getElementById('displayName').addEventListener('change', (e) => {
+        const pseudoInput = document.getElementById('pseudoInput');
+        const realNameInput = document.getElementById('realNameInput');
+        pseudoInput.style.display = e.target.value === 'pseudo' ? 'block' : 'none';
+        realNameInput.style.display = e.target.value === 'real' ? 'block' : 'none';
+    });
+
+    // Paramètres
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        document.getElementById('settingsModal').classList.add('active');
+    });
+
+    document.getElementById('closeSettings').addEventListener('click', closeModals);
+
+    document.getElementById('themeSelect').addEventListener('change', (e) => {
+        document.body.className = e.target.value;
+        saveSettings();
+    });
+
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const color = btn.dataset.color;
+            document.documentElement.style.setProperty('--primary', color);
+            saveSettings();
+        });
+    });
+
+    // Fermeture modale en cliquant à l'extérieur
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeModals();
+        }
+    });
+}
+
+function openModal(goalId = null) {
+    currentGoalId = goalId;
+    const modal = document.getElementById('modal');
+    const form = document.getElementById('goalForm');
+    
+    if (goalId) {
+        const goal = goals.find(g => g.id === goalId);
+        document.getElementById('modalTitle').textContent = '✏️ Modifier l\'objectif';
+        document.getElementById('goalTitle').value = goal.title;
+        document.getElementById('goalDescription').value = goal.description;
+        document.getElementById('goalType').value = goal.type;
+        document.getElementById('goalProgress').value = goal.progress;
+        document.getElementById('progressValue').textContent = goal.progress;
+        document.querySelector(`input[name="visibility"][value="${goal.visibility}"]`).checked = true;
+        
+        if (goal.visibility === 'public') {
+            document.getElementById('publicOptions').style.display = 'block';
+            document.getElementById('displayName').value = goal.displayName;
+            document.getElementById('allowComments').checked = goal.allowComments;
+            
+            if (goal.displayName === 'pseudo') {
+                document.getElementById('pseudoInput').style.display = 'block';
+                document.getElementById('pseudoInput').value = goal.authorName;
+            } else if (goal.displayName === 'real') {
+                document.getElementById('realNameInput').style.display = 'block';
+                document.getElementById('realNameInput').value = goal.authorName;
+            }
+        }
+    } else {
+        document.getElementById('modalTitle').textContent = '✨ Nouvel Objectif';
+        form.reset();
+        document.getElementById('progressValue').textContent = '0';
+        document.getElementById('publicOptions').style.display = 'none';
+        document.getElementById('pseudoInput').style.display = 'none';
+        document.getElementById('realNameInput').style.display = 'none';
+    }
+    
+    modal.classList.add('active');
+}
+
+function closeModals() {
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.classList.remove('active');
+    });
+    currentGoalId = null;
+}
+
+function saveGoal(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('goalTitle').value;
+    const description = document.getElementById('goalDescription').value;
+    const type = document.getElementById('goalType').value;
+    const progress = parseInt(document.getElementById('goalProgress').value);
+    const visibility = document.querySelector('input[name="visibility"]:checked').value;
+    const displayName = document.getElementById('displayName').value;
+    const allowComments = document.getElementById('allowComments').checked;
+    
+    let authorName = 'Anonyme';
+    if (visibility === 'public') {
+        if (displayName === 'pseudo') {
+            authorName = document.getElementById('pseudoInput').value || 'Anonyme';
+        } else if (displayName === 'real') {
+            authorName = document.getElementById('realNameInput').value || currentUser;
+        }
+    }
+    
+    const goal = {
+        id: currentGoalId || Date.now().toString(),
+        title,
+        description,
+        type,
+        progress,
+        visibility,
+        displayName,
+        authorName,
+        allowComments,
+        likes: currentGoalId ? goals.find(g => g.id === currentGoalId).likes : 0,
+        dislikes: currentGoalId ? goals.find(g => g.id === currentGoalId).dislikes : 0,
+        comments: currentGoalId ? goals.find(g => g.id === currentGoalId).comments : [],
+        createdAt: currentGoalId ? goals.find(g => g.id === currentGoalId).createdAt : Date.now()
+    };
+    
+    if (currentGoalId) {
+        const index = goals.findIndex(g => g.id === currentGoalId);
+        goals[index] = goal;
+    } else {
+        goals.push(goal);
+
+        // Analytics: suivi nouvel objectif
+        analytics.logEvent('add_goal', {
+            title: title,
+            visibility: visibility
+        });
+    }
+    
+    saveData();
+    renderGoals();
+    closeModals();
+}
+
+function deleteGoal(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
+        goals = goals.filter(g => g.id !== id);
+        myLikes = myLikes.filter(l => l !== id);
+        myComments = myComments.filter(c => c.goalId !== id);
+        saveData();
+        renderGoals();
+    }
+}
+
+function toggleLike(id) {
+    const goal = goals.find(g => g.id === id);
+    if (!goal) return;
+    
+    const likeIndex = myLikes.indexOf(id);
+    if (likeIndex > -1) {
+        myLikes.splice(likeIndex, 1);
+        goal.likes--;
+    } else {
+        myLikes.push(id);
+        goal.likes++;
+
+        // Analytics: suivi like
+        analytics.logEvent('like_goal', { goalId: id });
+    }
+    
+    saveData();
+    renderGoals();
+}
+
+function addComment(goalId, text) {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal || !goal.allowComments) return;
+    
+    const comment = {
+        id: Date.now().toString(),
+        goalId,
+        author: currentUser,
+        text,
+        createdAt: Date.now()
+    };
+    
+    goal.comments.push(comment);
+    myComments.push(comment);
+    
+    // Analytics: suivi commentaire
+    analytics.logEvent('comment_goal', { goalId: goalId });
+    
+    saveData();
+    renderGoals();
+}
+
+function showSection(section) {
+    document.querySelectorAll('.goals-section').forEach(s => s.classList.remove('active'));
+    
+    switch(section) {
+        case 'public':
+            document.getElementById('publicSection').classList.add('active');
+            renderPublicGoals();
+            break;
+        case 'private':
+            document.getElementById('privateSection').classList.add('active');
+            renderPrivateGoals();
+            break;
+        case 'comments':
+            document.getElementById('commentsSection').classList.add('active');
+            renderMyComments();
+            break;
+        case 'likes':
+            document.getElementById('likesSection').classList.add('active');
+            renderMyLikes();
+            break;
+    }
+}
+
+// ... Les autres fonctions renderGoals, renderPublicGoals, renderPrivateGoals, renderMyComments, renderMyLikes,
+// createGoalCard, submitComment, attachGoalEventListeners, saveData, loadData, saveSettings restent identiques
   db.collection("publicGoals")
     .orderBy("createdAt", "desc")
     .onSnapshot(snapshot => {
