@@ -3,38 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi d'Objectifs</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Tracker d'Objectifs</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1><i class="fas fa-bullseye"></i> Suivi d'Objectifs</h1>
-            <nav>
-                <button class="nav-btn active" data-section="mes-objectifs">Mes Objectifs</button>
-                <button class="nav-btn" data-section="objectifs-publics">Objectifs Publics</button>
-                <button class="nav-btn" data-section="check-in">Check-in Quotidien</button>
-            </nav>
+        <div class="header-content">
+            <h1>🎯 Mes Objectifs</h1>
+            <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
         </div>
     </header>
 
-    <div class="container">
-        <!-- Section: Mes Objectifs -->
-        <section id="mes-objectifs" class="section active">
-            <div class="card">
-                <button class="btn" id="btn-new-goal">
-                    <i class="fas fa-plus"></i> Créer un objectif
-                </button>
+    <nav class="main-nav">
+        <button class="nav-btn active" data-section="public">📢 Objectifs Publics</button>
+        <button class="nav-btn" data-section="private">🔒 Objectifs Privés</button>
+    </nav>
+
+    <nav class="secondary-nav">
+        <button class="secondary-btn" data-section="comments">💬 Mes Commentaires</button>
+        <button class="secondary-btn" data-section="likes">❤️ Mes Likes</button>
+    </nav>
+
+    <main>
+        <button id="addGoalBtn" class="add-btn">✨ Nouvel Objectif</button>
+
+        <section id="publicSection" class="goals-section active">
+            <div id="publicGoals" class="goals-grid"></div>
+        </section>
+
+        <section id="privateSection" class="goals-section">
+            <div id="privateGoals" class="goals-grid"></div>
+        </section>
+
+        <section id="commentsSection" class="goals-section">
+            <div id="myComments" class="goals-grid"></div>
+        </section>
+
+        <section id="likesSection" class="goals-section">
+            <div id="myLikes" class="goals-grid"></div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">✨ Nouvel Objectif</h2>
+            <form id="goalForm">
+                <div class="form-group">
+                    <label>📝 Titre *</label>
+                    <input type="text" id="goalTitle" required placeholder="Mon objectif...">
+                </div>
+                <div class="form-group">
+                    <label>📄 Description</label>
+                    <textarea id="goalDescription" rows="3" placeholder="Détails de mon objectif..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>📅 Type d'objectif *</label>
+                    <select id="goalType" required>
+                        <option value="day">Jour</option>
+                        <option value="week">Semaine</option>
+                        <option value="month">Mois</option>
+                        <option value="year">Année</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📊 Progression : <span id="progressValue">0</span>%</label>
+                    <input type="range" id="goalProgress" min="0" max="100" value="0">
+                </div>
+                <div class="form-group">
+                    <label>👁️ Visibilité</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="visibility" value="private" checked> 🔒 Privé</label>
+                        <label><input type="radio" name="visibility" value="public"> 📢 Public</label>
+                    </div>
+                </div>
+                <div id="publicOptions" class="public-options">
+                    <div class="form-group">
+                        <label>👤 Nom affiché</label>
+                        <select id="displayName">
+                            <option value="real">Nom réel</option>
+                            <option value="pseudo">Pseudo</option>
+                            <option value="anonymous">Anonyme</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="pseudoInput" placeholder="Entrez votre pseudo" style="display: none;">
+                        <input type="text" id="realNameInput" placeholder="Entrez votre nom" style="display: none;">
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="allowComments" checked> 💬 Autoriser les commentaires</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeSettings">&times;</span>
+            <h2>⚙️ Paramètres</h2>
+            <div class="form-group">
+                <label>🌓 Thème</label>
+                <select id="themeSelect">
+                    <option value="light">☀️ Clair</option>
+                    <option value="dark">🌙 Sombre</option>
+                </select>
             </div>
-            <div id="my-goals-list"></div>
-        </section>
+            <div class="form-group">
+                <label>🎨 Couleur principale</label>
+                <div class="color-picker">
+                    <button type="button" class="color-btn" data-color="#6366f1" style="background: #6366f1;"></button>
+                    <button type="button" class="color-btn" data-color="#ec4899" style="background: #ec4899;"></button>
+                    <button type="button" class="color-btn" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
+                    <button type="button" class="color-btn" data-color="#f59e0b" style="background: #f59e0b;"></button>
+                    <button type="button" class="color-btn" data-color="#10b981" style="background: #10b981;"></button>
+                    <button type="button" class="color-btn" data-color="#3b82f6" style="background: #3b82f6;"></button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- Section: Objectifs Publics -->
-        <section id="objectifs-publics" class="section">
-            <div id="public-goals-list"></div>
-        </section>
-
+    <script src="script.js"></script>
+</body>
+</html>
         <!-- Section: Check-in Quotidien -->
         <section id="check-in" class="section">
             <div class="card">
