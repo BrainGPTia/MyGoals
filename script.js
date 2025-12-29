@@ -13,57 +13,6 @@ const firebaseConfig = {
   measurementId: "G-FLTJQ3Z259"
 };
 
-// Initialisation de Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// État de l'application
-let goals = []; // Les objectifs chargés pour l'affichage
-let myLikes = []; // Les IDs des objectifs aimés par l'utilisateur actuel
-let myComments = []; // Les commentaires faits par l'utilisateur actuel
-let currentGoalId = null;
-let currentUser = null; // UID de l'utilisateur Firebase
-let currentUserName = 'Anonyme'; // Nom ou pseudo (utilisé pour les commentaires/likes)
-
-// Références DOM
-const publicGoalsContainer = document.getElementById('publicGoals');
-const privateGoalsContainer = document.getElementById('privateGoals');
-const commentsSectionContainer = document.getElementById('myComments');
-const likesSectionContainer = document.getElementById('myLikes');
-
-
-// =================================================================
-// 1. GESTION DE L'AUTHENTIFICATION ET DU DÉMARRAGE
-// =================================================================
-
-// Listener d'état d'authentification Firebase
-auth.onAuthStateChanged(user => {
-    if (user) {
-        // Utilisateur connecté
-        currentUser = user.uid;
-        currentUserName = user.displayName || 'Utilisateur ' + user.uid.substring(0, 4);
-        console.log(`Utilisateur connecté: ${currentUserName} (${currentUser})`);
-    } else {
-        // Utilisateur déconnecté - Simuler une connexion anonyme ou créer un compte.
-        // Pour ce tracker, nous allons simuler un utilisateur anonyme si aucun n'est logué.
-        // NOTE: Une implémentation réelle nécessiterait un écran de login.
-        console.log("Aucun utilisateur détecté. Tentative de connexion anonyme...");
-        auth.signInAnonymously().catch(error => {
-            console.error("Erreur de connexion anonyme:", error);
-        });
-    }
-    
-    // Une fois que nous avons un UID, nous pouvons charger les données
-    loadData();
-    setupEventListeners();
-    renderGoals();
-});
-
-// Charger les données au démarrage (déjà dans onAuthStateChanged)
-// window.addEventListener('DOMContentLoaded', () => { loadData(); setupEventListeners(); renderGoals(); });
-
-
 // État de l'application
 let goals = [];
 let myLikes = [];
