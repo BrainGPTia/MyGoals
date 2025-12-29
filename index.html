@@ -3,137 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker d'Objectifs</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Suivi d'Objectifs</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>🎯 Mes Objectifs</h1>
-            <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>📋 Mes Objectifs</h1>
+            </div>
+            <div class="header-right">
+                <button class="btn-primary" id="addGoalBtn">+ Nouvel Objectif</button>
+                <button class="settings-btn" id="settingsBtn">⚙️</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="public">
+                Objectifs Publics
+            </button>
+            <button class="tab-btn" data-tab="private">
+                Mes Objectifs Privés
+            </button>
+            <button class="tab-btn" data-tab="interactions">
+                Mes Interactions <span class="badge" id="interactionsBadge">0</span>
+            </button>
         </div>
-    </header>
 
-    <nav class="main-nav">
-        <button class="nav-btn active" data-section="public">📢 Objectifs Publics</button>
-        <button class="nav-btn" data-section="private">🔒 Objectifs Privés</button>
-    </nav>
+        <div class="tab-content active" id="publicTab">
+            <div class="goals-grid" id="publicGoals">
+                <div class="loading">Chargement des objectifs publics...</div>
+            </div>
+        </div>
 
-    <nav class="secondary-nav">
-        <button class="secondary-btn" data-section="comments">💬 Mes Commentaires</button>
-        <button class="secondary-btn" data-section="likes">❤️ Mes Likes</button>
-    </nav>
+        <div class="tab-content" id="privateTab">
+            <div class="goals-grid" id="privateGoals">
+                <div class="empty-state">Aucun objectif privé pour le moment</div>
+            </div>
+        </div>
 
-    <main>
-        <button id="addGoalBtn" class="add-btn">✨ Nouvel Objectif</button>
+        <div class="tab-content" id="interactionsTab">
+            <div class="goals-grid" id="interactionsGoals">
+                <div class="empty-state">Aucune interaction pour le moment</div>
+            </div>
+        </div>
+    </div>
 
-        <section id="publicSection" class="goals-section active">
-            <div id="publicGoals" class="goals-grid"></div>
-        </section>
-
-        <section id="privateSection" class="goals-section">
-            <div id="privateGoals" class="goals-grid"></div>
-        </section>
-
-        <section id="commentsSection" class="goals-section">
-            <div id="myComments" class="goals-grid"></div>
-        </section>
-
-        <section id="likesSection" class="goals-section">
-            <div id="myLikes" class="goals-grid"></div>
-        </section>
-    </main>
-
-    <div id="modal" class="modal">
+    <!-- Modale pour créer/modifier un objectif -->
+    <div class="modal" id="goalModal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle">✨ Nouvel Objectif</h2>
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouvel Objectif</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
             <form id="goalForm">
                 <div class="form-group">
-                    <label>📝 Titre *</label>
-                    <input type="text" id="goalTitle" required placeholder="Mon objectif...">
+                    <label for="goalTitle">Titre de l'objectif *</label>
+                    <input type="text" id="goalTitle" required placeholder="Ex: Courir 5km">
                 </div>
+
                 <div class="form-group">
-                    <label>📄 Description</label>
-                    <textarea id="goalDescription" rows="3" placeholder="Détails de mon objectif..."></textarea>
+                    <label for="goalDescription">Description</label>
+                    <textarea id="goalDescription" rows="3" placeholder="Décrivez votre objectif..."></textarea>
                 </div>
+
                 <div class="form-group">
-                    <label>📅 Type d'objectif *</label>
-                    <select id="goalType" required>
-                        <option value="day">Jour</option>
-                        <option value="week">Semaine</option>
-                        <option value="month">Mois</option>
-                        <option value="year">Année</option>
+                    <label for="goalType">Type d'objectif</label>
+                    <select id="goalType">
+                        <option value="sport">Sport</option>
+                        <option value="sante">Santé</option>
+                        <option value="travail">Travail</option>
+                        <option value="personnel">Personnel</option>
+                        <option value="autre">Autre</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label>📊 Progression : <span id="progressValue">0</span>%</label>
-                    <input type="range" id="goalProgress" min="0" max="100" value="0">
+                    <label for="goalProgress">Progression (%)</label>
+                    <input type="number" id="goalProgress" min="0" max="100" value="0">
                 </div>
+
                 <div class="form-group">
-                    <label>👁️ Visibilité</label>
+                    <label>Visibilité *</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="visibility" value="private" checked> 🔒 Privé</label>
-                        <label><input type="radio" name="visibility" value="public"> 📢 Public</label>
+                        <label class="radio-label">
+                            <input type="radio" name="visibility" value="private" checked>
+                            <span>Privé</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="visibility" value="public">
+                            <span>Public</span>
+                        </label>
                     </div>
                 </div>
-                <div id="publicOptions" class="public-options">
+
+                <div id="publicOptions" class="public-options" style="display: none;">
                     <div class="form-group">
-                        <label>👤 Nom affiché</label>
+                        <label for="authorName">Nom d'auteur *</label>
+                        <input type="text" id="authorName" placeholder="Votre nom ou pseudo">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="displayName">Afficher comme</label>
                         <select id="displayName">
                             <option value="real">Nom réel</option>
                             <option value="pseudo">Pseudo</option>
-                            <option value="anonymous">Anonyme</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <input type="text" id="pseudoInput" placeholder="Entrez votre pseudo" style="display: none;">
-                        <input type="text" id="realNameInput" placeholder="Entrez votre nom" style="display: none;">
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="allowComments" checked> 💬 Autoriser les commentaires</label>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="allowComments" checked>
+                            <span>Autoriser les commentaires</span>
+                        </label>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Annuler</button>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">Annuler</button>
+                    <button type="submit" class="btn-primary" id="submitBtn">Créer</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="settingsModal" class="modal">
+    <!-- Modale pour les commentaires -->
+    <div class="modal" id="commentsModal">
         <div class="modal-content">
-            <span class="close" id="closeSettings">&times;</span>
-            <h2>⚙️ Paramètres</h2>
-            <div class="form-group">
-                <label>🌓 Thème</label>
-                <select id="themeSelect">
-                    <option value="light">☀️ Clair</option>
-                    <option value="dark">🌙 Sombre</option>
-                </select>
+            <div class="modal-header">
+                <h2>Commentaires</h2>
+                <button class="close-btn" id="closeCommentsBtn">&times;</button>
             </div>
-            <div class="form-group">
-                <label>🎨 Couleur principale</label>
-                <div class="color-picker">
-                    <button type="button" class="color-btn" data-color="#6366f1" style="background: #6366f1;"></button>
-                    <button type="button" class="color-btn" data-color="#ec4899" style="background: #ec4899;"></button>
-                    <button type="button" class="color-btn" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
-                    <button type="button" class="color-btn" data-color="#f59e0b" style="background: #f59e0b;"></button>
-                    <button type="button" class="color-btn" data-color="#10b981" style="background: #10b981;"></button>
-                    <button type="button" class="color-btn" data-color="#3b82f6" style="background: #3b82f6;"></button>
+            <div class="comments-list" id="commentsList"></div>
+            <div class="comment-form">
+                <input type="text" id="commentInput" placeholder="Ajouter un commentaire...">
+                <button class="btn-primary" id="addCommentBtn">Envoyer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Paramètres -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Paramètres</h2>
+                <button class="close-btn" id="closeSettingsBtn">&times;</button>
+            </div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h3>🎨 Apparence</h3>
+                    <div class="settings-option">
+                        <div class="settings-option-info">
+                            <div class="settings-option-title">Thème</div>
+                            <div class="settings-option-desc">Choisissez votre thème préféré</div>
+                        </div>
+                        <div class="theme-buttons">
+                            <button class="theme-btn active" data-theme="light">☀️ Clair</button>
+                            <button class="theme-btn" data-theme="dark">🌙 Sombre</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>📊 Statistiques</h3>
+                    <div class="settings-option">
+                        <div class="settings-option-info">
+                            <div class="settings-option-title">Objectifs likés</div>
+                            <div class="settings-option-desc" id="likedCount">0 objectifs</div>
+                        </div>
+                    </div>
+                    <div class="settings-option">
+                        <div class="settings-option-info">
+                            <div class="settings-option-title">Commentaires postés</div>
+                            <div class="settings-option-desc" id="commentsCount">0 commentaires</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>🗑️ Données</h3>
+                    <div class="settings-option">
+                        <div class="settings-option-info">
+                            <div class="settings-option-title">Réinitialiser les interactions</div>
+                            <div class="settings-option-desc">Efface l'historique des likes et commentaires</div>
+                        </div>
+                        <button class="btn-secondary" id="resetInteractionsBtn">Réinitialiser</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
 </body>
-</html><!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker d'Objectifs</title>
-    <link rel="stylesheet" href="style.css">
-</head>
+</html>
