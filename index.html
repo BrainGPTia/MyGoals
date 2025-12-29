@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker d'Objectifs</title>
+    <title>MyGoals</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="header-content">
-            <h1>🎯 Mes Objectifs</h1>
+            <h1>🎯 MyGoals</h1>
             <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
         </div>
     </header>
@@ -44,6 +44,7 @@
         </section>
     </main>
 
+    <!-- MODALE OBJECTIF -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -51,14 +52,16 @@
             <form id="goalForm">
                 <div class="form-group">
                     <label>📝 Titre *</label>
-                    <input type="text" id="goalTitle" required placeholder="Mon objectif...">
+                    <input type="text" id="goalTitle" required>
                 </div>
+
                 <div class="form-group">
                     <label>📄 Description</label>
-                    <textarea id="goalDescription" rows="3" placeholder="Détails de mon objectif..."></textarea>
+                    <textarea id="goalDescription" rows="3"></textarea>
                 </div>
+
                 <div class="form-group">
-                    <label>📅 Type d'objectif *</label>
+                    <label>📅 Type *</label>
                     <select id="goalType" required>
                         <option value="day">Jour</option>
                         <option value="week">Semaine</option>
@@ -66,34 +69,37 @@
                         <option value="year">Année</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label>📊 Progression : <span id="progressValue">0</span>%</label>
                     <input type="range" id="goalProgress" min="0" max="100" value="0">
                 </div>
+
                 <div class="form-group">
                     <label>👁️ Visibilité</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="visibility" value="private" checked> 🔒 Privé</label>
-                        <label><input type="radio" name="visibility" value="public"> 📢 Public</label>
-                    </div>
+                    <label><input type="radio" name="visibility" value="private" checked> Privé</label>
+                    <label><input type="radio" name="visibility" value="public"> Public</label>
                 </div>
-                <div id="publicOptions" class="public-options">
+
+                <div id="publicOptions" style="display:none">
                     <div class="form-group">
                         <label>👤 Nom affiché</label>
                         <select id="displayName">
-                            <option value="real">Nom réel</option>
-                            <option value="pseudo">Pseudo</option>
                             <option value="anonymous">Anonyme</option>
+                            <option value="pseudo">Pseudo</option>
+                            <option value="real">Nom réel</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <input type="text" id="pseudoInput" placeholder="Entrez votre pseudo" style="display: none;">
-                        <input type="text" id="realNameInput" placeholder="Entrez votre nom" style="display: none;">
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="allowComments" checked> 💬 Autoriser les commentaires</label>
-                    </div>
+
+                    <input type="text" id="pseudoInput" placeholder="Pseudo" style="display:none">
+                    <input type="text" id="realNameInput" placeholder="Nom" style="display:none">
+
+                    <label>
+                        <input type="checkbox" id="allowComments" checked>
+                        Autoriser les commentaires
+                    </label>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
                     <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Annuler</button>
@@ -102,10 +108,12 @@
         </div>
     </div>
 
+    <!-- MODALE PARAMÈTRES -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeSettings">&times;</span>
             <h2>⚙️ Paramètres</h2>
+
             <div class="form-group">
                 <label>🌓 Thème</label>
                 <select id="themeSelect">
@@ -113,41 +121,42 @@
                     <option value="dark">🌙 Sombre</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label>🎨 Couleur principale</label>
                 <div class="color-picker">
-                    <button type="button" class="color-btn" data-color="#6366f1" style="background: #6366f1;"></button>
-                    <button type="button" class="color-btn" data-color="#ec4899" style="background: #ec4899;"></button>
-                    <button type="button" class="color-btn" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
-                    <button type="button" class="color-btn" data-color="#f59e0b" style="background: #f59e0b;"></button>
-                    <button type="button" class="color-btn" data-color="#10b981" style="background: #10b981;"></button>
-                    <button type="button" class="color-btn" data-color="#3b82f6" style="background: #3b82f6;"></button>
+                    <button class="color-btn" data-color="#6366f1"></button>
+                    <button class="color-btn" data-color="#ec4899"></button>
+                    <button class="color-btn" data-color="#8b5cf6"></button>
+                    <button class="color-btn" data-color="#f59e0b"></button>
+                    <button class="color-btn" data-color="#10b981"></button>
+                    <button class="color-btn" data-color="#3b82f6"></button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase -->
+    <!-- 🔥 FIREBASE (IMPORTANT) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    
-    <script>
-      // Configuration Firebase (remplace les valeurs par celles de ton projet)
-      const firebaseConfig = {
-        apiKey: "AIzaSyC1Fs9gu6E1ROpoX8A-codMgaAfxzW0x7o",
-    authDomain: "mygoals-e3cbb.firebaseapp.com",
-    projectId: "mygoals-e3cbb",
-    storageBucket: "mygoals-e3cbb.firebasestorage.app",
-    messagingSenderId: "314414000182",
-    appId: "1:314414000182:web:d89491086bb56fdc771097",
-    measurementId: "G-FLTJQ3Z259"
-      };
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-      // Initialisation Firebase
-      firebase.initializeApp(firebaseConfig);
-      firebase.analytics();
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1Fs9gu6E1ROpoX8A-codMgaAfxzW0x7o",
+            authDomain: "mygoals-e3cbb.firebaseapp.com",
+            projectId: "mygoals-e3cbb",
+            storageBucket: "mygoals-e3cbb.appspot.com",
+            messagingSenderId: "314414000182",
+            appId: "1:314414000182:web:d89491086bb56fdc771097",
+            measurementId: "G-FLTJQ3Z259"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
     </script>
 
+    <!-- TON JS -->
     <script src="script.js"></script>
 </body>
 </html>
