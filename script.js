@@ -364,6 +364,102 @@ async function addComment(goalId, text) {
 // 4. LOGIQUE D'AFFICHAGE (Mise à jour pour Firebase)
 // =================================================================
 
+// État de l'application
+let goals = [];
+let myLikes = [];
+let myComments = [];
+let currentGoalId = null;
+let currentUser = 'Utilisateur';
+
+// Charger les données au démarrage
+window.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    setupEventListeners();
+    renderGoals();
+});
+
+// Configuration des écouteurs d'événements
+function setupEventListeners() {
+    // Navigation principale
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            showSection(btn.dataset.section);
+        });
+    });
+
+    // Navigation secondaire
+    document.querySelectorAll('.secondary-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            showSection(btn.dataset.section);
+        });
+    });
+
+    // Bouton nouvel objectif
+    document.getElementById('addGoalBtn').addEventListener('click', () => openModal());
+
+    // Fermeture modale
+    document.querySelectorAll('.close').forEach(btn => {
+        btn.addEventListener('click', closeModals);
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', closeModals);
+
+    // Soumission formulaire
+    document.getElementById('goalForm').addEventListener('submit', saveGoal);
+
+    // Slider progression
+    document.getElementById('goalProgress').addEventListener('input', (e) => {
+        document.getElementById('progressValue').textContent = e.target.value;
+    });
+
+    // Visibilité publique/privée
+    document.querySelectorAll('input[name="visibility"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const publicOptions = document.getElementById('publicOptions');
+            publicOptions.style.display = e.target.value === 'public' ? 'block' : 'none';
+        });
+    });
+
+    // Nom affiché
+    document.getElementById('displayName').addEventListener('change', (e) => {
+        const pseudoInput = document.getElementById('pseudoInput');
+        const realNameInput = document.getElementById('realNameInput');
+        pseudoInput.style.display = e.target.value === 'pseudo' ? 'block' : 'none';
+        realNameInput.style.display = e.target.value === 'real' ? 'block' : 'none';
+    });
+
+    // Paramètres
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        document.getElementById('settingsModal').classList.add('active');
+    });
+
+    document.getElementById('closeSettings').addEventListener('click', closeModals);
+
+    document.getElementById('themeSelect').addEventListener('change', (e) => {
+        document.body.className = e.target.value;
+        saveSettings();
+    });
+
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const color = btn.dataset.color;
+            document.documentElement.style.setProperty('--primary', color);
+            saveSettings();
+        });
+    });
+
+    // Fermeture modale en cliquant à l'extérieur
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeModals();
+        }
+    });
+}
+
 function openModal(goalId = null) {
     currentGoalId = goalId;
     const modal = document.getElementById('modal');
@@ -371,8 +467,6 @@ function openModal(goalId = null) {
     
     if (goalId) {
         const goal = goals.find(g => g.id === goalId);
-        if (!goal) return;
-
         document.getElementById('modalTitle').textContent = '✏️ Modifier l\'objectif';
         document.getElementById('goalTitle').value = goal.title;
         document.getElementById('goalDescription').value = goal.description;
@@ -381,26 +475,18 @@ function openModal(goalId = null) {
         document.getElementById('progressValue').textContent = goal.progress;
         document.querySelector(`input[name="visibility"][value="${goal.visibility}"]`).checked = true;
         
-        const publicOptions = document.getElementById('publicOptions');
         if (goal.visibility === 'public') {
-            publicOptions.style.display = 'block';
-            document.getElementById('displayName').value = goal.displayNameType;
+            document.getElementById('publicOptions').style.display = 'block';
+            document.getElementById('displayName').value = goal.displayName;
             document.getElementById('allowComments').checked = goal.allowComments;
             
-            const pseudoInput = document.getElementById('pseudoInput');
-            const realNameInput = document.getElementById('realNameInput');
-            pseudoInput.style.display = 'none';
-            realNameInput.style.display = 'none';
-
-            if (goal.displayNameType === 'pseudo' && goal.authorName) {
-                pseudoInput.style.display = 'block';
-                pseudoInput.value = goal.authorName;
-            } else if (goal.displayNameType === 'real' && goal.authorName) {
-                realNameInput.style.display = 'block';
-                realNameInput.value = goal.authorName;
+            if (goal.displayName === 'pseudo') {
+                document.getElementById('pseudoInput').style.display = 'block';
+                document.getElementById('pseudoInput').value = goal.authorName;
+            } else if (goal.displayName === 'real') {
+                document.getElementById('realNameInput').style.display = 'block';
+                document.getElementById('realNameInput').value = goal.authorName;
             }
-        } else {
-             publicOptions.style.display = 'none';
         }
     } else {
         document.getElementById('modalTitle').textContent = '✨ Nouvel Objectif';
@@ -421,7 +507,98 @@ function closeModals() {
     currentGoalId = null;
 }
 
-// ... (Les fonctions showSection et renderGoals restent les mêmes)
+function saveGoal(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('goalTitle').value;
+    const description = document.getElementById('goalDescription').value;
+    const type = document.getElementById('goalType').value;
+    const progress = parseInt(document.getElementById('goalProgress').value);
+    const visibility = document.querySelector('input[name="visibility"]:checked').value;
+    const displayName = document.getElementById('displayName').value;
+    const allowComments = document.getElementById('allowComments').checked;
+    
+    let authorName = 'Anonyme';
+    if (visibility === 'public') {
+        if (displayName === 'pseudo') {
+            authorName = document.getElementById('pseudoInput').value || 'Anonyme';
+        } else if (displayName === 'real') {
+            authorName = document.getElementById('realNameInput').value || currentUser;
+        }
+    }
+    
+    const goal = {
+        id: currentGoalId || Date.now().toString(),
+        title,
+        description,
+        type,
+        progress,
+        visibility,
+        displayName,
+        authorName,
+        allowComments,
+        likes: currentGoalId ? goals.find(g => g.id === currentGoalId).likes : 0,
+        dislikes: currentGoalId ? goals.find(g => g.id === currentGoalId).dislikes : 0,
+        comments: currentGoalId ? goals.find(g => g.id === currentGoalId).comments : [],
+        createdAt: currentGoalId ? goals.find(g => g.id === currentGoalId).createdAt : Date.now()
+    };
+    
+    if (currentGoalId) {
+        const index = goals.findIndex(g => g.id === currentGoalId);
+        goals[index] = goal;
+    } else {
+        goals.push(goal);
+    }
+    
+    saveData();
+    renderGoals();
+    closeModals();
+}
+
+function deleteGoal(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
+        goals = goals.filter(g => g.id !== id);
+        myLikes = myLikes.filter(l => l !== id);
+        myComments = myComments.filter(c => c.goalId !== id);
+        saveData();
+        renderGoals();
+    }
+}
+
+function toggleLike(id) {
+    const goal = goals.find(g => g.id === id);
+    if (!goal) return;
+    
+    const likeIndex = myLikes.indexOf(id);
+    if (likeIndex > -1) {
+        myLikes.splice(likeIndex, 1);
+        goal.likes--;
+    } else {
+        myLikes.push(id);
+        goal.likes++;
+    }
+    
+    saveData();
+    renderGoals();
+}
+
+function addComment(goalId, text) {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal || !goal.allowComments) return;
+    
+    const comment = {
+        id: Date.now().toString(),
+        goalId,
+        author: currentUser,
+        text,
+        createdAt: Date.now()
+    };
+    
+    goal.comments.push(comment);
+    myComments.push(comment);
+    saveData();
+    renderGoals();
+}
 
 function showSection(section) {
     document.querySelectorAll('.goals-section').forEach(s => s.classList.remove('active'));
@@ -457,11 +634,10 @@ function renderGoals() {
 
 function renderPublicGoals() {
     const container = document.getElementById('publicGoals');
-    // Filtrer les objectifs publics *non* créés par l'utilisateur actuel pour un affichage "communauté"
-    const publicGoals = goals.filter(g => g.visibility === 'public' && g.authorId !== currentUser);
+    const publicGoals = goals.filter(g => g.visibility === 'public');
     
     if (publicGoals.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucun objectif public de la communauté pour le moment</p></div>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucun objectif public pour le moment</p></div>';
         return;
     }
     
@@ -471,24 +647,20 @@ function renderPublicGoals() {
 
 function renderPrivateGoals() {
     const container = document.getElementById('privateGoals');
-    // Objectifs privés + Objectifs publics créés par l'utilisateur actuel
-    const privateGoals = goals.filter(g => g.authorId === currentUser);
+    const privateGoals = goals.filter(g => g.visibility === 'private');
     
     if (privateGoals.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucun objectif personnel pour le moment</p></div>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucun objectif privé pour le moment</p></div>';
         return;
     }
     
-    // Afficher tous les objectifs de l'utilisateur (privés et publics qu'il peut éditer)
     container.innerHTML = privateGoals.map(goal => createGoalCard(goal, false)).join('');
     attachGoalEventListeners();
 }
 
 function renderMyComments() {
     const container = document.getElementById('myComments');
-    // Trouver les IDs des objectifs commentés par l'utilisateur
-    const commentedGoalIds = [...new Set(myComments.map(c => c.goalId))];
-    const commentedGoals = goals.filter(g => commentedGoalIds.includes(g.id));
+    const commentedGoals = goals.filter(g => g.comments.some(c => myComments.find(mc => mc.id === c.id)));
     
     if (commentedGoals.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💬</div><p>Vous n\'avez pas encore commenté</p></div>';
@@ -501,7 +673,6 @@ function renderMyComments() {
 
 function renderMyLikes() {
     const container = document.getElementById('myLikes');
-    // Les objectifs aimés sont ceux dont l'ID est dans la liste myLikes chargée depuis Firebase
     const likedGoals = goals.filter(g => myLikes.includes(g.id));
     
     if (likedGoals.length === 0) {
@@ -513,17 +684,16 @@ function renderMyLikes() {
     attachGoalEventListeners();
 }
 
-function createGoalCard(goal, isPublicView) {
+function createGoalCard(goal, isPublic) {
     const typeLabels = { day: '📅 Jour', week: '📆 Semaine', month: '🗓️ Mois', year: '📊 Année' };
     const isLiked = myLikes.includes(goal.id);
-    const isOwner = goal.authorId === currentUser;
     
     return `
-        <div class="goal-card" data-goal-id="${goal.id}">
+        <div class="goal-card">
             <div class="goal-header">
                 <div>
                     <div class="goal-title">${goal.title}</div>
-                    ${isPublicView ? `<small style="color: var(--text-light);">Par ${goal.authorName || 'Anonyme'}</small>` : ''}
+                    ${isPublic ? `<small style="color: var(--text-light);">Par ${goal.authorName}</small>` : ''}
                 </div>
                 <span class="goal-type">${typeLabels[goal.type]}</span>
             </div>
@@ -538,19 +708,23 @@ function createGoalCard(goal, isPublicView) {
                 </div>
             </div>
             <div class="goal-actions">
-                ${isOwner ? `
-                    <button class="btn btn-primary" onclick="openModal('${goal.id}')">✏️ Modifier</button>
-                    <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">🗑️ Supprimer</button>
-                ` : ''}
-                ${isPublicView ? `
+                <button class="btn btn-primary" onclick="openModal('${goal.id}')">✏️ Modifier</button>
+                <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">🗑️ Supprimer</button>
+                ${isPublic ? `
                     <button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${goal.id}')">
-                        ${isLiked ? '❤️' : '🤍'} ${goal.likesCount || 0}
+                        ${isLiked ? '❤️' : '🤍'} ${goal.likes}
                     </button>
                 ` : ''}
             </div>
-            ${isPublicView && goal.allowComments ? `
+            ${isPublic && goal.allowComments ? `
                 <div class="comments-section">
-                    <h4>💬 Commentaires (${goal.commentsCount || 0})</h4>
+                    <h4>💬 Commentaires (${goal.comments.length})</h4>
+                    ${goal.comments.map(c => `
+                        <div class="comment">
+                            <div class="comment-author">${c.author}</div>
+                            <div class="comment-text">${c.text}</div>
+                        </div>
+                    `).join('')}
                     <div class="comment-form">
                         <input type="text" class="comment-input" placeholder="Ajouter un commentaire..." data-goal="${goal.id}">
                         <button class="btn btn-primary" onclick="submitComment('${goal.id}')">💬</button>
@@ -562,7 +736,7 @@ function createGoalCard(goal, isPublicView) {
 }
 
 function submitComment(goalId) {
-    const input = document.querySelector(`.goal-card[data-goal-id="${goalId}"] .comment-input`);
+    const input = document.querySelector(`input[data-goal="${goalId}"]`);
     if (input && input.value.trim()) {
         addComment(goalId, input.value.trim());
         input.value = '';
@@ -579,24 +753,36 @@ function attachGoalEventListeners() {
     });
 }
 
-function saveSettings() {
+function saveData() {
     const data = {
+        goals,
+        myLikes,
+        myComments,
         theme: document.body.className,
         primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primary')
     };
-    localStorage.setItem('goalsTrackerSettings', JSON.stringify(data));
+    localStorage.setItem('goalsTrackerData', JSON.stringify(data));
 }
 
-// La fonction loadData gère maintenant à la fois Firebase et les paramètres locaux (saveData n'est plus utilisé pour goals)
-// function saveData() { ... } // Supprimé car les objectifs sont gérés par Firebase
+function loadData() {
+    const saved = localStorage.getItem('goalsTrackerData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        goals = data.goals || [];
+        myLikes = data.myLikes || [];
+        myComments = data.myComments || [];
+        
+        if (data.theme) {
+            document.body.className = data.theme;
+            document.getElementById('themeSelect').value = data.theme;
+        }
+        
+        if (data.primaryColor) {
+            document.documentElement.style.setProperty('--primary', data.primaryColor);
+        }
+    }
+}
 
-// function loadData() { ... } // Fusionné dans la section 3 (Logique Firebase)
-
-// Les fonctions saveSettings et loadData sont conservées pour les préférences UI/UX (thème, couleur)
 function saveSettings() {
-    const data = {
-        theme: document.body.className,
-        primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primary')
-    };
-    localStorage.setItem('goalsTrackerSettings', JSON.stringify(data));
+    saveData();
 }
