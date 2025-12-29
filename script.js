@@ -10,6 +10,12 @@ let currentUser = 'Utilisateur';
 let analytics = null;
 let db = null;
 
+// Rendre les fonctions globales pour qu'elles soient accessibles partout
+window.openModal = openModal;
+window.deleteGoal = deleteGoal;
+window.toggleLike = toggleLike;
+window.submitComment = submitComment;
+
 // ===============================
 // CHARGEMENT INITIAL
 // ===============================
@@ -26,7 +32,9 @@ window.addEventListener('DOMContentLoaded', () => {
                     id: doc.id,
                     ...doc.data()
                 }));
-                renderPublicGoals();
+                if (document.querySelector('#publicSection.active')) {
+                    renderPublicGoals();
+                }
             });
     }
 
@@ -65,20 +73,20 @@ function setupEventListeners() {
     document.getElementById('goalForm').addEventListener('submit', saveGoal);
 
     // Slider progression
-    document.getElementById('goalProgress').addEventListener('input', e => {
+    document.getElementById('goalProgress').addEventListener('input', (e) => {
         document.getElementById('progressValue').textContent = e.target.value;
     });
 
     // Visibilité
     document.querySelectorAll('input[name="visibility"]').forEach(radio => {
-        radio.addEventListener('change', e => {
+        radio.addEventListener('change', (e) => {
             const publicOptions = document.getElementById('publicOptions');
             publicOptions.style.display = e.target.value === 'public' ? 'block' : 'none';
         });
     });
 
     // Nom affiché
-    document.getElementById('displayName').addEventListener('change', e => {
+    document.getElementById('displayName').addEventListener('change', (e) => {
         const pseudoInput = document.getElementById('pseudoInput');
         const realNameInput = document.getElementById('realNameInput');
         pseudoInput.style.display = e.target.value === 'pseudo' ? 'block' : 'none';
@@ -91,21 +99,21 @@ function setupEventListeners() {
     });
     document.getElementById('closeSettings').addEventListener('click', closeModals);
 
-    document.getElementById('themeSelect').addEventListener('change', e => {
+    document.getElementById('themeSelect').addEventListener('change', (e) => {
         document.body.className = e.target.value;
-        saveSettings();
+        saveData();
     });
 
     document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
+        btn.addEventListener('click', (e) => {
             e.preventDefault();
             document.documentElement.style.setProperty('--primary', btn.dataset.color);
-            saveSettings();
+            saveData();
         });
     });
 
     // Fermer modal en cliquant à l'extérieur
-    window.addEventListener('click', e => {
+    window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) closeModals();
     });
 }
@@ -120,12 +128,12 @@ function openModal(goalId = null) {
 
     if (goalId) {
         // Mode modification
-        const goal = goals.find(g => g.id === goalId) || publicGoals.find(g => g.id === goalId);
+        const goal = goals.find(g => g.id === goalId);
         if (!goal) return;
 
         document.getElementById('modalTitle').textContent = '✏️ Modifier l\'objectif';
         document.getElementById('goalTitle').value = goal.title;
-        document.getElementById('goalDescription').value = goal.description;
+        document.getElementById('goalDescription').value = goal.description || '';
         document.getElementById('goalType').value = goal.type;
         document.getElementById('goalProgress').value = goal.progress;
         document.getElementById('progressValue').textContent = goal.progress;
@@ -200,16 +208,12 @@ function saveGoal(e) {
     };
 
     if (currentGoalId) {
-        // Modification
-        if (visibility === 'public' && db) {
-            db.collection("publicGoals").doc(currentGoalId).update(goal);
-        } else {
-            const index = goals.findIndex(g => g.id === currentGoalId);
-            if (index !== -1) {
-                goals[index] = { id: currentGoalId, ...goal };
-                saveData();
-                renderPrivateGoals();
-            }
+        // Modification (seulement privés pour l'instant)
+        const index = goals.findIndex(g => g.id === currentGoalId);
+        if (index !== -1) {
+            goals[index] = { ...goal, id: currentGoalId, likes: goals[index].likes, comments: goals[index].comments };
+            saveData();
+            renderPrivateGoals();
         }
     } else {
         // Création
@@ -217,7 +221,7 @@ function saveGoal(e) {
             db.collection("publicGoals").add(goal);
             if (analytics) analytics.logEvent('add_goal', { visibility: 'public' });
         } else {
-            goals.push({ id: Date.now().toString(), ...goal });
+            goals.push({ ...goal, id: Date.now().toString() });
             saveData();
             renderPrivateGoals();
             if (analytics) analytics.logEvent('add_goal', { visibility: 'private' });
@@ -247,40 +251,41 @@ function deleteGoal(id, isPublic) {
 // ===============================
 // LIKES
 // ===============================
-function toggleLike(id, isPublic) {
+function toggleLike(id) {
     const likeIndex = myLikes.indexOf(id);
+    const goal = publicGoals.find(g => g.id === id);
+    
+    if (!goal || !db) return;
 
-    if (isPublic && db) {
-        const goalRef = db.collection("publicGoals").doc(id);
-        
-        if (likeIndex > -1) {
-            myLikes.splice(likeIndex, 1);
-            goalRef.update({ likes: firebase.firestore.FieldValue.increment(-1) });
-        } else {
-            myLikes.push(id);
-            goalRef.update({ likes: firebase.firestore.FieldValue.increment(1) });
-            if (analytics) analytics.logEvent('like_goal', { goalId: id });
-        }
+    const goalRef = db.collection("publicGoals").doc(id);
+    
+    if (likeIndex > -1) {
+        myLikes.splice(likeIndex, 1);
+        goalRef.update({ likes: firebase.firestore.FieldValue.increment(-1) });
+    } else {
+        myLikes.push(id);
+        goalRef.update({ likes: firebase.firestore.FieldValue.increment(1) });
+        if (analytics) analytics.logEvent('like_goal', { goalId: id });
     }
 
     saveData();
-    renderPublicGoals();
 }
 
 // ===============================
 // COMMENTAIRES
 // ===============================
-function addComment(goalId, text, isPublic) {
-    if (!text.trim()) return;
+function submitComment(goalId) {
+    const input = document.querySelector(`input[data-goal="${goalId}"]`);
+    if (!input || !input.value.trim()) return;
 
     const comment = {
         id: Date.now().toString(),
         author: currentUser,
-        text: text.trim(),
+        text: input.value.trim(),
         createdAt: Date.now()
     };
 
-    if (isPublic && db) {
+    if (db) {
         const goalRef = db.collection("publicGoals").doc(goalId);
         goalRef.update({
             comments: firebase.firestore.FieldValue.arrayUnion(comment)
@@ -290,14 +295,7 @@ function addComment(goalId, text, isPublic) {
 
     myComments.push({ ...comment, goalId });
     saveData();
-}
-
-function submitComment(goalId, isPublic) {
-    const input = document.querySelector(`input[data-goal="${goalId}"]`);
-    if (input && input.value.trim()) {
-        addComment(goalId, input.value.trim(), isPublic);
-        input.value = '';
-    }
+    input.value = '';
 }
 
 // ===============================
@@ -338,7 +336,7 @@ function renderPublicGoals() {
     }
 
     container.innerHTML = publicGoals.map(g => createGoalCard(g, true)).join('');
-    attachCardEvents();
+    attachCommentListeners();
 }
 
 function renderPrivateGoals() {
@@ -350,12 +348,12 @@ function renderPrivateGoals() {
     }
 
     container.innerHTML = goals.map(g => createGoalCard(g, false)).join('');
-    attachCardEvents();
+    attachCommentListeners();
 }
 
 function renderMyComments() {
     const container = document.getElementById('myComments');
-    const commentedGoals = [...publicGoals, ...goals].filter(g => 
+    const commentedGoals = publicGoals.filter(g => 
         g.comments && g.comments.some(c => myComments.find(mc => mc.id === c.id))
     );
 
@@ -364,21 +362,21 @@ function renderMyComments() {
         return;
     }
 
-    container.innerHTML = commentedGoals.map(g => createGoalCard(g, g.visibility === 'public')).join('');
-    attachCardEvents();
+    container.innerHTML = commentedGoals.map(g => createGoalCard(g, true)).join('');
+    attachCommentListeners();
 }
 
 function renderMyLikes() {
     const container = document.getElementById('myLikes');
-    const likedGoals = [...publicGoals, ...goals].filter(g => myLikes.includes(g.id));
+    const likedGoals = publicGoals.filter(g => myLikes.includes(g.id));
 
     if (!likedGoals.length) {
         container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❤️</div><p>Vous n\'avez pas encore aimé d\'objectifs</p></div>';
         return;
     }
 
-    container.innerHTML = likedGoals.map(g => createGoalCard(g, g.visibility === 'public')).join('');
-    attachCardEvents();
+    container.innerHTML = likedGoals.map(g => createGoalCard(g, true)).join('');
+    attachCommentListeners();
 }
 
 // ===============================
@@ -408,9 +406,9 @@ function createGoalCard(goal, isPublic) {
                 </div>
             </div>
             <div class="goal-actions">
-                ${!isPublic ? `<button class="btn btn-primary btn-edit" data-id="${goal.id}" data-public="false">✏️ Modifier</button>` : ''}
-                <button class="btn btn-danger btn-delete" data-id="${goal.id}" data-public="${isPublic}">🗑️ Supprimer</button>
-                ${isPublic ? `<button class="btn btn-like ${isLiked ? 'liked' : ''} btn-like-goal" data-id="${goal.id}" data-public="true">${isLiked ? '❤️' : '🤍'} ${goal.likes || 0}</button>` : ''}
+                ${!isPublic ? `<button class="btn btn-primary" onclick="openModal('${goal.id}')">✏️ Modifier</button>` : ''}
+                <button class="btn btn-danger" onclick="deleteGoal('${goal.id}', ${isPublic})">🗑️ Supprimer</button>
+                ${isPublic ? `<button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${goal.id}')">${isLiked ? '❤️' : '🤍'} ${goal.likes || 0}</button>` : ''}
             </div>
             ${isPublic && goal.allowComments !== false ? `
                 <div class="comments-section">
@@ -422,8 +420,8 @@ function createGoalCard(goal, isPublic) {
                         </div>
                     `).join('')}
                     <div class="comment-form">
-                        <input type="text" class="comment-input" placeholder="Ajouter un commentaire..." data-goal="${goal.id}" data-public="${isPublic}">
-                        <button class="btn btn-primary btn-submit-comment" data-goal="${goal.id}" data-public="${isPublic}">💬</button>
+                        <input type="text" class="comment-input" placeholder="Ajouter un commentaire..." data-goal="${goal.id}">
+                        <button class="btn btn-primary" onclick="submitComment('${goal.id}')">💬</button>
                     </div>
                 </div>
             ` : ''}
@@ -432,42 +430,13 @@ function createGoalCard(goal, isPublic) {
 }
 
 // ===============================
-// EVENTS CARTES (MOBILE SAFE)
+// LISTENERS COMMENTAIRES
 // ===============================
-function attachCardEvents() {
-    // Boutons supprimer
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', () => {
-            deleteGoal(btn.dataset.id, btn.dataset.public === 'true');
-        });
-    });
-
-    // Boutons modifier
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', () => {
-            openModal(btn.dataset.id);
-        });
-    });
-
-    // Boutons like
-    document.querySelectorAll('.btn-like-goal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            toggleLike(btn.dataset.id, btn.dataset.public === 'true');
-        });
-    });
-
-    // Boutons soumettre commentaire
-    document.querySelectorAll('.btn-submit-comment').forEach(btn => {
-        btn.addEventListener('click', () => {
-            submitComment(btn.dataset.goal, btn.dataset.public === 'true');
-        });
-    });
-
-    // Enter pour commentaire
+function attachCommentListeners() {
     document.querySelectorAll('.comment-input').forEach(input => {
-        input.addEventListener('keypress', e => {
+        input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                submitComment(input.dataset.goal, input.dataset.public === 'true');
+                submitComment(input.dataset.goal);
             }
         });
     });
@@ -504,10 +473,6 @@ function loadData() {
             document.documentElement.style.setProperty('--primary', data.primaryColor);
         }
     }
-}
-
-function saveSettings() {
-    saveData();
 }
 
 // ===============================
