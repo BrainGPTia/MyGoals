@@ -3,151 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker d'Objectifs</title>
+    <title>Objectifs | Suivi Personnel</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+
     <header>
-        <div class="header-content">
-            <h1>🎯 Mes Objectifs</h1>
-            <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
+        <h1 class="logo"><i class="fas fa-bullseye"></i> GoalTracker</h1>
+        <nav>
+            <button id="view-public" class="nav-button active"><i class="fas fa-globe"></i> Public</button>
+            <button id="view-private" class="nav-button"><i class="fas fa-lock"></i> Privé</button>
+        </nav>
+        <div class="header-actions">
+            <button id="open-settings" class="icon-button settings-button" title="Paramètres">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button id="add-goal-button" class="button-primary icon-button" title="Ajouter un objectif">
+                <i class="fas fa-plus"></i>
+            </button>
         </div>
     </header>
 
-    <nav class="main-nav">
-        <button class="nav-btn active" data-section="public">📢 Objectifs Publics</button>
-        <button class="nav-btn" data-section="private">🔒 Objectifs Privés</button>
-    </nav>
-
-    <nav class="secondary-nav">
-        <button class="secondary-btn" data-section="comments">💬 Mes Commentaires</button>
-        <button class="secondary-btn" data-section="likes">❤️ Mes Likes</button>
-    </nav>
-
-    <main>
-        <button id="addGoalBtn" class="add-btn">✨ Nouvel Objectif</button>
-
-        <section id="publicSection" class="goals-section active">
-            <div id="publicGoals" class="goals-grid"></div>
-        </section>
-
-        <section id="privateSection" class="goals-section">
-            <div id="privateGoals" class="goals-grid"></div>
-        </section>
-
-        <section id="commentsSection" class="goals-section">
-            <div id="myComments" class="goals-grid"></div>
-        </section>
-
-        <section id="likesSection" class="goals-section">
-            <div id="myLikes" class="goals-grid"></div>
-        </section>
+    <main id="app-container">
+        <section id="goals-list" class="goals-container"></section>
+        
+        <p id="empty-state" class="empty-state-message" style="display: none;">
+            <i class="fas fa-info-circle"></i> Aucun objectif à afficher dans cette catégorie.
+        </p>
     </main>
 
-    <div id="modal" class="modal">
+    <div id="goal-modal" class="modal animated">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle">✨ Nouvel Objectif</h2>
-            <form id="goalForm">
+            <button class="close-button" data-close-modal="goal-modal"><i class="fas fa-times"></i></button>
+            <h2 id="modal-title">Créer un Objectif</h2>
+            <form id="goal-form">
+                <input type="hidden" id="goal-id">
+                
                 <div class="form-group">
-                    <label>📝 Titre *</label>
-                    <input type="text" id="goalTitle" required placeholder="Mon objectif...">
+                    <label for="title">Titre</label>
+                    <input type="text" id="title" placeholder="Ex: Apprendre l'Espagnol" required>
                 </div>
+
                 <div class="form-group">
-                    <label>📄 Description</label>
-                    <textarea id="goalDescription" rows="3" placeholder="Détails de mon objectif..."></textarea>
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Détaillez vos actions..." required></textarea>
                 </div>
-                <div class="form-group">
-                    <label>📅 Type d'objectif *</label>
-                    <select id="goalType" required>
-                        <option value="day">Jour</option>
-                        <option value="week">Semaine</option>
-                        <option value="month">Mois</option>
-                        <option value="year">Année</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>📊 Progression : <span id="progressValue">0</span>%</label>
-                    <input type="range" id="goalProgress" min="0" max="100" value="0">
-                </div>
-                <div class="form-group">
-                    <label>👁️ Visibilité</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="visibility" value="private" checked> 🔒 Privé</label>
-                        <label><input type="radio" name="visibility" value="public"> 📢 Public</label>
-                    </div>
-                </div>
-                <div id="publicOptions" class="public-options">
-                    <div class="form-group">
-                        <label>👤 Nom affiché</label>
-                        <select id="displayName">
-                            <option value="real">Nom réel</option>
-                            <option value="pseudo">Pseudo</option>
-                            <option value="anonymous">Anonyme</option>
+
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="type">Période</label>
+                        <select id="type" required>
+                            <option value="jour">Jour</option>
+                            <option value="semaine">Semaine</option>
+                            <option value="mois">Mois</option>
+                            <option value="annee">Année</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <input type="text" id="pseudoInput" placeholder="Entrez votre pseudo" style="display: none;">
-                        <input type="text" id="realNameInput" placeholder="Entrez votre nom" style="display: none;">
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="allowComments" checked> 💬 Autoriser les commentaires</label>
+                    <div class="form-group half-width">
+                        <label for="progress">Progression (<span id="progress-value">0%</span>)</label>
+                        <input type="range" id="progress" min="0" max="100" value="0">
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Annuler</button>
+
+                <fieldset class="visibility-switch">
+                    <legend>Visibilité</legend>
+                    <label class="switch-label">
+                        <input type="radio" id="public-radio" name="visibility" value="public" checked> Public
+                    </label>
+                    <label class="switch-label">
+                        <input type="radio" id="private-radio" name="visibility" value="private"> Privé
+                    </label>
+                </fieldset>
+
+                <div id="public-options" class="public-options-group">
+                    <div class="form-group">
+                        <label for="display-name">Nom affiché</label>
+                        <input type="text" id="display-name" placeholder="Pseudo ou Nom Réel">
+                    </div>
+                    
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="allow-comments" checked>
+                        Autoriser les commentaires
+                    </label>
                 </div>
+
+                <button type="submit" class="button-primary"><i class="fas fa-save"></i> Sauvegarder</button>
             </form>
         </div>
     </div>
-
-    <div id="settingsModal" class="modal">
+    
+    <div id="settings-modal" class="modal animated">
         <div class="modal-content">
-            <span class="close" id="closeSettings">&times;</span>
-            <h2>⚙️ Paramètres</h2>
-            <div class="form-group">
-                <label>🌓 Thème</label>
-                <select id="themeSelect">
-                    <option value="light">☀️ Clair</option>
-                    <option value="dark">🌙 Sombre</option>
-                </select>
+            <button class="close-button" data-close-modal="settings-modal"><i class="fas fa-times"></i></button>
+            <h2><i class="fas fa-cog"></i> Paramètres du Site</h2>
+            
+            <div class="setting-section">
+                <h3>Thème de l'interface</h3>
+                <div class="theme-switcher">
+                    <button id="set-light-theme" class="theme-button"><i class="fas fa-sun"></i> Clair</button>
+                    <button id="set-dark-theme" class="theme-button"><i class="fas fa-moon"></i> Sombre</button>
+                </div>
             </div>
-            <div class="form-group">
-                <label>🎨 Couleur principale</label>
-                <div class="color-picker">
-                    <button type="button" class="color-btn" data-color="#6366f1" style="background: #6366f1;"></button>
-                    <button type="button" class="color-btn" data-color="#ec4899" style="background: #ec4899;"></button>
-                    <button type="button" class="color-btn" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
-                    <button type="button" class="color-btn" data-color="#f59e0b" style="background: #f59e0b;"></button>
-                    <button type="button" class="color-btn" data-color="#10b981" style="background: #10b981;"></button>
-                    <button type="button" class="color-btn" data-color="#3b82f6" style="background: #3b82f6;"></button>
+
+            <div class="setting-section">
+                <h3>Couleur d'accentuation</h3>
+                <div class="color-picker-group">
+                    <input type="color" id="color-picker">
+                    <p>Changez la couleur principale des boutons et accents.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <div id="comments-modal" class="modal animated">
+        <div class="modal-content">
+            <button class="close-button" data-close-modal="comments-modal"><i class="fas fa-times"></i></button>
+            <h2 id="comments-title"><i class="fas fa-comments"></i> Commentaires</h2>
+            <div id="comments-list" class="comments-list"></div>
+            <div class="comment-input-area">
+                <textarea id="new-comment-text" placeholder="Ajouter un commentaire..." rows="2"></textarea>
+                <button id="submit-comment" class="button-primary" disabled>Poster</button>
+            </div>
+        </div>
+    </div>
     
-    <script>
-      // Configuration Firebase (remplace les valeurs par celles de ton projet)
-      const firebaseConfig = {
-        apiKey: "AIzaSyC1Fs9gu6E1ROpoX8A-codMgaAfxzW0x7o",
-    authDomain: "mygoals-e3cbb.firebaseapp.com",
-    projectId: "mygoals-e3cbb",
-    storageBucket: "mygoals-e3cbb.firebasestorage.app",
-    messagingSenderId: "314414000182",
-    appId: "1:314414000182:web:d89491086bb56fdc771097",
-    measurementId: "G-FLTJQ3Z259"
-      };
-
-      // Initialisation Firebase
-      firebase.initializeApp(firebaseConfig);
-      firebase.analytics();
-    </script>
-
     <script src="script.js"></script>
 </body>
 </html>
