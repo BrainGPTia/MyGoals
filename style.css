@@ -5,7 +5,8 @@
 }
 
 :root {
-    --primary: #6366f1;
+    /* Couleurs principales (par défaut: clair) */
+    --primary: #6366f1; /* Bleu-Violet */
     --bg: #f8fafc;
     --card-bg: #ffffff;
     --text: #1e293b;
@@ -13,6 +14,10 @@
     --border: #e2e8f0;
     --shadow: rgba(0, 0, 0, 0.1);
     --hover-shadow: rgba(99, 102, 241, 0.3);
+
+    /* Couleurs secondaires pour les gradients/effets */
+    --gradient-start: #6366f1;
+    --gradient-end: #ec4899;
 }
 
 body {
@@ -22,19 +27,22 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Thème Sombre */
 body.dark {
     --bg: #0f172a;
     --card-bg: #1e293b;
     --text: #f1f5f9;
     --text-light: #94a3b8;
     --border: #334155;
-    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow: rgba(0, 0, 0, 0.4);
 }
+
+/* --- Section Header et Navigation --- */
 
 header {
     background: var(--card-bg);
-    padding: 1.5rem;
-    box-shadow: 0 2px 10px var(--shadow);
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 10px var(--shadow);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -47,46 +55,38 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
-h1 {
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo {
     font-size: 1.8rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary), #ec4899);
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.icon-btn {
-    background: var(--primary);
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    font-size: 1.3rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+.logo-icon {
+    font-size: 1.8rem;
+    color: var(--primary);
 }
 
-.icon-btn:hover {
-    transform: scale(1.1) rotate(90deg);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-}
-
+/* Nouvelle structure de navigation principale */
 .main-nav {
-    background: var(--card-bg);
-    padding: 1rem;
     display: flex;
     gap: 1rem;
-    justify-content: center;
     flex-wrap: wrap;
-    box-shadow: 0 2px 8px var(--shadow);
 }
 
-.nav-btn {
-    padding: 0.8rem 2rem;
+.nav-button { /* Ancien .nav-btn renommé pour éviter conflit de structure */
+    padding: 0.8rem 1.5rem;
     border: 2px solid var(--border);
     background: transparent;
     border-radius: 25px;
@@ -94,91 +94,87 @@ h1 {
     font-weight: 600;
     color: var(--text);
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.nav-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
-}
-
-.nav-btn:hover::before {
-    left: 100%;
-}
-
-.nav-btn:hover {
+.nav-button:hover {
     border-color: var(--primary);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px var(--hover-shadow);
 }
 
-.nav-btn.active {
+.nav-button.active {
     background: var(--primary);
     color: white;
     border-color: var(--primary);
     box-shadow: 0 5px 15px var(--hover-shadow);
 }
 
-.secondary-nav {
+.header-actions {
     display: flex;
-    gap: 1rem;
-    justify-content: center;
-    padding: 1rem;
-    flex-wrap: wrap;
+    gap: 0.8rem;
+    align-items: center;
 }
 
-.secondary-btn {
-    padding: 0.6rem 1.5rem;
+/* Bouton Icone (Paramètres) */
+.icon-button { /* Remplace .icon-btn */
+    background: transparent;
     border: none;
-    background: var(--card-bg);
-    border-radius: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 1.3rem;
     cursor: pointer;
-    color: var(--text);
-    font-weight: 500;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px var(--shadow);
+    color: var(--text-light);
 }
 
-.secondary-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px var(--shadow);
-    background: var(--primary);
+.icon-button:hover {
+    background: var(--border);
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+/* --- Boutons généraux (inclus dans .goal-actions, .header-actions, .form-actions) --- */
+
+.button-primary, .button-secondary, .btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.button-primary { /* Pour le bouton 'Ajouter' dans le header */
+    background: linear-gradient(135deg, var(--primary), #8b5cf6);
     color: white;
+    box-shadow: 0 5px 15px var(--hover-shadow);
+}
+.button-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--hover-shadow);
 }
 
-main {
+/* --- Contenu Principal --- */
+
+#app-container {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-.add-btn {
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
-    color: white;
-    border: none;
-    padding: 1rem 2.5rem;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 2rem;
-    box-shadow: 0 5px 20px var(--hover-shadow);
-    transition: all 0.3s ease;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.add-btn:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px var(--hover-shadow);
+.goals-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 
 .goals-section {
@@ -201,35 +197,19 @@ main {
     }
 }
 
-.goals-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-}
+/* --- Goal Card --- */
 
 .goal-card {
     background: var(--card-bg);
-    border-radius: 20px;
+    border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 4px 15px var(--shadow);
     transition: all 0.3s ease;
-    border: 2px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.goal-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), #ec4899, #8b5cf6);
+    border-left: 5px solid var(--primary);
 }
 
 .goal-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-5px) scale(1.01);
     box-shadow: 0 10px 30px var(--hover-shadow);
     border-color: var(--primary);
 }
@@ -263,6 +243,7 @@ main {
     line-height: 1.6;
 }
 
+/* Progression */
 .progress-container {
     margin-bottom: 1rem;
 }
@@ -277,89 +258,53 @@ main {
 
 .progress-bar {
     width: 100%;
-    height: 12px;
+    height: 10px;
     background: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     overflow: hidden;
-    position: relative;
 }
 
 .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--primary), #8b5cf6);
-    border-radius: 10px;
+    border-radius: 5px;
     transition: width 0.5s ease;
-    position: relative;
-    overflow: hidden;
 }
 
-.progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
+/* Actions */
 .goal-actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    margin-top: 1rem;
 }
 
-.btn {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-}
-
+/* Style des boutons dans la carte */
 .btn-primary {
     background: var(--primary);
     color: white;
-    box-shadow: 0 4px 10px var(--hover-shadow);
 }
-
-.btn-primary:hover {
-    box-shadow: 0 6px 15px var(--hover-shadow);
-}
-
 .btn-secondary {
     background: var(--border);
     color: var(--text);
 }
-
 .btn-danger {
     background: #ef4444;
     color: white;
 }
-
 .btn-like {
     background: transparent;
-    border: 2px solid #ef4444;
-    color: #ef4444;
+    border: 2px solid var(--text-light);
+    color: var(--text-light);
     padding: 0.5rem 1rem;
 }
-
 .btn-like.liked {
     background: #ef4444;
+    border-color: #ef4444;
     color: white;
 }
+
+/* --- Modale générale (.modal) --- */
 
 .modal {
     display: none;
@@ -380,10 +325,7 @@ main {
     align-items: center;
 }
 
-.modal-content {
-    background: var(--card-bg);
-    padding: 2.5rem;
-    border-radius: 25px;
+.modal-container { /* Le conteneur centré */
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
@@ -393,10 +335,17 @@ main {
     position: relative;
 }
 
+.modal-content { /* Le contenu intérieur */
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 25px;
+    position: relative;
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(50px) scale(0.9);
+        transform: translateY(50px) scale(0.95);
     }
     to {
         opacity: 1;
@@ -404,27 +353,40 @@ main {
     }
 }
 
-.close {
+.close-button { /* Remplace .close */
     position: absolute;
-    right: 1.5rem;
-    top: 1.5rem;
-    font-size: 2rem;
+    right: 1rem;
+    top: 1rem;
+    font-size: 1.5rem;
     font-weight: bold;
     cursor: pointer;
     color: var(--text-light);
     transition: all 0.3s ease;
     width: 35px;
     height: 35px;
+    background: none;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
 }
 
-.close:hover {
+.close-button:hover {
     background: var(--border);
     color: var(--text);
     transform: rotate(90deg);
+}
+
+/* --- Formulaires Modale --- */
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .form-group {
@@ -436,9 +398,12 @@ main {
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.form-group input[type="text"],
+.form-group input:not([type="radio"]),
 .form-group textarea,
 .form-group select {
     width: 100%;
@@ -451,7 +416,7 @@ main {
     transition: all 0.3s ease;
 }
 
-.form-group input[type="text"]:focus,
+.form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
@@ -459,43 +424,73 @@ main {
     box-shadow: 0 0 0 3px var(--hover-shadow);
 }
 
-.form-group input[type="range"] {
-    width: 100%;
-    height: 8px;
-    border-radius: 5px;
-    background: var(--border);
-    outline: none;
-    -webkit-appearance: none;
-}
-
-.form-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    cursor: pointer;
-    box-shadow: 0 2px 10px var(--hover-shadow);
-    transition: all 0.3s ease;
-}
-
-.form-group input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.3);
-}
-
-.radio-group {
+.form-row {
     display: flex;
     gap: 1.5rem;
 }
+.form-row .form-group {
+    flex: 1;
+}
 
-.radio-group label {
+/* Slider */
+.form-group input[type="range"] {
+    /* Style du slider pour la progression */
+    height: 8px;
+}
+.progress-value-display {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Visibilité Radio Cards */
+.visibility-section {
+    margin-bottom: 1.5rem;
+}
+.section-label {
+    font-weight: 600;
+    margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+.visibility-toggle {
+    display: flex;
+    gap: 1rem;
+}
+.radio-card {
+    flex: 1;
+    display: block;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
     cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg);
+}
+.radio-card input[type="radio"] {
+    display: none;
+}
+.radio-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+}
+.radio-card-content i {
+    font-size: 1.5rem;
+}
+.radio-card input[type="radio"]:checked + .radio-card-content {
+    color: var(--primary);
+}
+.radio-card input[type="radio"]:checked + .radio-card-content,
+.radio-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 10px var(--hover-shadow);
 }
 
+/* Options Publiques */
 .public-options {
     display: none;
     padding: 1rem;
@@ -503,62 +498,142 @@ main {
     border-radius: 12px;
     margin-top: 1rem;
     animation: fadeIn 0.3s ease;
+    border: 1px solid var(--border);
+}
+
+/* Checkbox pour commentaires (dans public-options) */
+.checkbox-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.checkbox-card input[type="checkbox"] {
+    transform: scale(1.2);
+}
+.checkbox-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.checkbox-title {
+    font-weight: 600;
+    color: var(--text);
+}
+.checkbox-desc {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    display: block;
 }
 
 .form-actions {
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+    justify-content: flex-end;
 }
 
-.color-picker {
+/* --- Modale Paramètres --- */
+
+.setting-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.setting-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Thème Switcher */
+.theme-switcher {
+    display: flex;
+    gap: 1rem;
+}
+.theme-button {
+    flex: 1;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--border);
+    border-radius: 15px;
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.theme-button:hover,
+body.light #set-light-theme,
+body.dark #set-dark-theme {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+}
+
+/* Color Picker */
+.color-presets {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    margin-bottom: 1rem;
 }
-
-.color-btn {
-    width: 50px;
-    height: 50px;
+.color-preset { /* Remplace .color-btn */
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     border: 3px solid transparent;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 5px var(--shadow);
+}
+.color-preset:hover {
+    transform: scale(1.2);
+    border-color: var(--text);
+}
+#color-picker {
+    width: 100%;
+    height: 40px;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-.color-btn:hover {
-    transform: scale(1.2);
-    border-color: white;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
+/* --- Commentaires (dans la Goal Card) --- */
 
 .comments-section {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid var(--border);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+.comments-section h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text);
 }
 
 .comment {
     background: var(--bg);
-    padding: 1rem;
-    border-radius: 12px;
-    margin-bottom: 0.8rem;
-    transition: all 0.3s ease;
-}
-
-.comment:hover {
-    transform: translateX(5px);
-    box-shadow: 0 3px 10px var(--shadow);
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-bottom: 0.6rem;
 }
 
 .comment-author {
     font-weight: 700;
     color: var(--primary);
-    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
 }
 
 .comment-text {
     color: var(--text-light);
+    font-size: 0.9rem;
 }
 
 .comment-form {
@@ -569,41 +644,74 @@ main {
 
 .comment-input {
     flex: 1;
-    padding: 0.8rem;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: var(--bg);
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg); /* Utiliser card-bg pour le champ dans la carte */
     color: var(--text);
 }
 
-@media (max-width: 768px) {
-    h1 {
-        font-size: 1.3rem;
-    }
+/* --- Empty State --- */
 
-    .goals-grid {
-        grid-template-columns: 1fr;
-    }
+.empty-state-message { /* Sélecteur mis à jour depuis le HTML */
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-light);
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 4px 10px var(--shadow);
+    margin-top: 2rem;
+}
 
-    .nav-btn {
-        padding: 0.6rem 1.2rem;
+.empty-state-message i {
+    font-size: 3rem;
+    margin-bottom: 0.8rem;
+    color: var(--primary);
+    opacity: 0.7;
+}
+
+.empty-state-message h3 {
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+/* --- Media Queries --- */
+
+@media (max-width: 992px) {
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .main-nav {
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+    .header-actions {
+        margin-top: 1rem;
+    }
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .logo {
+        font-size: 1.5rem;
+    }
+    .nav-button {
+        padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
-
     .modal-content {
         padding: 1.5rem;
         width: 95%;
     }
-}
-
-.empty-state {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-light);
-}
-
-.empty-state-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
+    .form-actions {
+        flex-direction: column;
+    }
+    .button-primary, .button-secondary {
+        width: 100%;
+    }
 }
