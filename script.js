@@ -1,8 +1,8 @@
 /// ===============================
 // ÉTAT DE L'APPLICATION
 // ===============================
-let goals = [];              // objectifs privés (local)
-let publicGoals = [];        // objectifs publics (Firebase)
+let goals = [];
+let publicGoals = [];
 let myLikes = [];
 let myComments = [];
 let currentGoalId = null;
@@ -10,7 +10,7 @@ let currentUser = 'Utilisateur';
 let analytics = null;
 let db = null;
 
-// ===============================
+/// ===============================
 // CHARGEMENT INITIAL
 // ===============================
 window.addEventListener('DOMContentLoaded', () => {
@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
         analytics = firebase.analytics();
         db = firebase.firestore();
 
-        // 🔥 SYNCHRO TEMPS RÉEL DES OBJECTIFS PUBLICS
+        // 🔥 Sync temps réel objectifs publics
         db.collection("publicGoals")
             .orderBy("createdAt", "desc")
             .onSnapshot(snapshot => {
@@ -35,8 +35,8 @@ window.addEventListener('DOMContentLoaded', () => {
     showSection('public');
 });
 
-// ===============================
-// EVENT LISTENERS
+/// ===============================
+// EVENT LISTENERS GLOBAUX
 // ===============================
 function setupEventListeners() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -92,29 +92,21 @@ function setupEventListeners() {
     });
 }
 
-// ===============================
+/// ===============================
 // MODALE
 // ===============================
-function openModal(goalId = null) {
-    currentGoalId = goalId;
-    const modal = document.getElementById('modal');
-    const form = document.getElementById('goalForm');
-
-    if (!goalId) {
-        form.reset();
-        document.getElementById('progressValue').textContent = '0';
-        document.getElementById('publicOptions').style.display = 'none';
-    }
-
-    modal.classList.add('active');
+function openModal() {
+    document.getElementById('goalForm').reset();
+    document.getElementById('progressValue').textContent = '0';
+    document.getElementById('publicOptions').style.display = 'none';
+    document.getElementById('modal').classList.add('active');
 }
 
 function closeModals() {
     document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-    currentGoalId = null;
 }
 
-// ===============================
+/// ===============================
 // SAUVEGARDE OBJECTIF
 // ===============================
 function saveGoal(e) {
@@ -135,35 +127,34 @@ function saveGoal(e) {
         createdAt: Date.now()
     };
 
-    // 🔥 PUBLIC → FIREBASE
     if (visibility === 'public' && db) {
         db.collection("publicGoals").add(goal);
         analytics?.logEvent('add_goal', { visibility: 'public' });
-    }
-    // 🔒 PRIVÉ → LOCAL
-    else {
+    } else {
         goals.push({ id: Date.now().toString(), ...goal });
         saveData();
+        renderPrivateGoals();
     }
 
     closeModals();
 }
 
+/// ===============================
+// SUPPRESSION OBJECTIF
 // ===============================
-// SUPPRESSION
-// ===============================
-function deleteGoal(id) {
+function deleteGoal(id, isPublic) {
     if (!confirm('Supprimer cet objectif ?')) return;
 
-    if (publicGoals.some(g => g.id === id)) {
+    if (isPublic && db) {
         db.collection("publicGoals").doc(id).delete();
     } else {
         goals = goals.filter(g => g.id !== id);
         saveData();
+        renderPrivateGoals();
     }
 }
 
-// ===============================
+/// ===============================
 // NAVIGATION
 // ===============================
 function showSection(section) {
@@ -173,13 +164,14 @@ function showSection(section) {
         publicSection.classList.add('active');
         renderPublicGoals();
     }
+
     if (section === 'private') {
         privateSection.classList.add('active');
         renderPrivateGoals();
     }
 }
 
-// ===============================
+/// ===============================
 // RENDER
 // ===============================
 function renderPublicGoals() {
@@ -191,6 +183,7 @@ function renderPublicGoals() {
     }
 
     container.innerHTML = publicGoals.map(g => createGoalCard(g, true)).join('');
+    attachCardEvents();
 }
 
 function renderPrivateGoals() {
@@ -202,26 +195,47 @@ function renderPrivateGoals() {
     }
 
     container.innerHTML = goals.map(g => createGoalCard(g, false)).join('');
+    attachCardEvents();
 }
 
-// ===============================
-// CARTE OBJECTIF
+/// ===============================
+// CARTE OBJECTIF (SANS onclick)
 // ===============================
 function createGoalCard(goal, isPublic) {
     return `
     <div class="goal-card">
         <h3>${escapeHtml(goal.title)}</h3>
         <p>${escapeHtml(goal.description || '')}</p>
+
         <div class="progress-bar">
             <div class="progress-fill" style="width:${goal.progress}%"></div>
         </div>
+
         <div class="goal-actions">
-            <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">🗑️</button>
+            <button 
+                class="btn btn-danger btn-delete" 
+                data-id="${goal.id}" 
+                data-public="${isPublic}">
+                🗑️ Supprimer
+            </button>
         </div>
     </div>`;
 }
 
+/// ===============================
+// EVENTS DES CARTES (MOBILE SAFE)
 // ===============================
+function attachCardEvents() {
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.id;
+            const isPublic = btn.dataset.public === 'true';
+            deleteGoal(id, isPublic);
+        });
+    });
+}
+
+/// ===============================
 // LOCAL STORAGE
 // ===============================
 function saveData() {
@@ -237,7 +251,7 @@ function saveSettings() {
     saveData();
 }
 
-// ===============================
+/// ===============================
 // UTILS
 // ===============================
 function escapeHtml(text) {
