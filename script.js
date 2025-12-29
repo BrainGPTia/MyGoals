@@ -505,3 +505,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // 7. Premier affichage
     refreshGoalsView();
 });
+});
