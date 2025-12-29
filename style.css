@@ -1,3 +1,4 @@
+/* --- 1. Reset & Variables de Base --- */
 * {
     margin: 0;
     padding: 0;
@@ -5,7 +6,8 @@
 }
 
 :root {
-    --primary: #6366f1;
+    /* Palettes de Couleurs - Facilement modifiables */
+    --primary: #6366f1; /* Bleu-Violet */
     --bg: #f8fafc;
     --card-bg: #ffffff;
     --text: #1e293b;
@@ -13,23 +15,32 @@
     --border: #e2e8f0;
     --shadow: rgba(0, 0, 0, 0.1);
     --hover-shadow: rgba(99, 102, 241, 0.3);
+
+    /* Variables pour les Gradients */
+    --gradient-start: var(--primary);
+    --gradient-end-h1: #ec4899;
+    --gradient-end-progress: #8b5cf6;
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: var(--bg);
     color: var(--text);
-    transition: all 0.3s ease;
+    /* Transition globale pour un changement de thème fluide */
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
+/* Thème Sombre */
 body.dark {
     --bg: #0f172a;
     --card-bg: #1e293b;
     --text: #f1f5f9;
     --text-light: #94a3b8;
     --border: #334155;
-    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow: rgba(0, 0, 0, 0.4);
 }
+
+/* --- 2. Header & Navigation --- */
 
 header {
     background: var(--card-bg);
@@ -38,7 +49,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header-content {
@@ -52,7 +63,8 @@ header {
 h1 {
     font-size: 1.8rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary), #ec4899);
+    /* Utilisation des nouvelles variables de gradient */
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end-h1));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -67,12 +79,19 @@ h1 {
     font-size: 1.3rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px var(--hover-shadow);
+    color: white; /* Ajout d'une couleur pour l'icône, si c'est un bouton */
 }
 
 .icon-btn:hover {
-    transform: scale(1.1) rotate(90deg);
+    /* Effet plus doux et moins déroutant que la rotation */
+    transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+}
+
+.icon-btn:focus-visible { /* Amélioration de l'accessibilité */
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
 }
 
 .main-nav {
@@ -83,6 +102,7 @@ h1 {
     justify-content: center;
     flex-wrap: wrap;
     box-shadow: 0 2px 8px var(--shadow);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 .nav-btn {
@@ -96,6 +116,12 @@ h1 {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+}
+
+/* Ajout focus-visible pour l'accessibilité */
+.nav-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
 }
 
 .nav-btn::before {
@@ -153,6 +179,14 @@ h1 {
     color: white;
 }
 
+.secondary-btn:focus-visible { /* Amélioration de l'accessibilité */
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+
+/* --- 3. Contenu Principal & Bouton Ajouter --- */
+
 main {
     max-width: 1200px;
     margin: 2rem auto;
@@ -160,7 +194,7 @@ main {
 }
 
 .add-btn {
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    background: linear-gradient(135deg, var(--primary), var(--gradient-end-progress)); /* Utilisation de la variable */
     color: white;
     border: none;
     padding: 1rem 2.5rem;
@@ -177,9 +211,17 @@ main {
 }
 
 .add-btn:hover {
-    transform: translateY(-3px) scale(1.05);
+    transform: translateY(-3px) scale(1.02); /* Échelle plus douce */
     box-shadow: 0 8px 25px var(--hover-shadow);
 }
+
+.add-btn:focus-visible { /* Amélioration de l'accessibilité */
+    outline: 2px solid white;
+    outline-offset: 3px;
+}
+
+
+/* --- 4. Section Objectifs (Goals) --- */
 
 .goals-section {
     display: none;
@@ -202,8 +244,9 @@ main {
 }
 
 .goals-grid {
+    /* Ajout d'une colonne minimale un peu plus petite pour les petits écrans */
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
 }
 
@@ -216,8 +259,11 @@ main {
     border: 2px solid transparent;
     position: relative;
     overflow: hidden;
+    /* Pour que la bordure du before soit visible, on retire la bordure transparente initiale */
+    border: none;
 }
 
+/* Ligne de gradient en haut */
 .goal-card::before {
     content: '';
     position: absolute;
@@ -225,13 +271,13 @@ main {
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, var(--primary), #ec4899, #8b5cf6);
+    background: linear-gradient(90deg, var(--primary), var(--gradient-end-h1), var(--gradient-end-progress));
+    z-index: 1;
 }
 
 .goal-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 10px 30px var(--hover-shadow);
-    border-color: var(--primary);
+    transform: translateY(-5px); /* Moins d'effet de scale */
+    box-shadow: 0 10px 30px var(--shadow), 0 0 0 2px var(--primary); /* Ombre et bordure claire */
 }
 
 .goal-header {
@@ -255,6 +301,7 @@ main {
     border-radius: 15px;
     font-size: 0.8rem;
     font-weight: 600;
+    align-self: flex-start; /* S'aligne correctement si le titre est long */
 }
 
 .goal-description {
@@ -277,7 +324,7 @@ main {
 
 .progress-bar {
     width: 100%;
-    height: 12px;
+    height: 10px; /* Légèrement plus fin */
     background: var(--border);
     border-radius: 10px;
     overflow: hidden;
@@ -286,7 +333,7 @@ main {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), #8b5cf6);
+    background: linear-gradient(90deg, var(--primary), var(--gradient-end-progress)); /* Utilisation de la variable */
     border-radius: 10px;
     transition: width 0.5s ease;
     position: relative;
@@ -294,6 +341,7 @@ main {
 }
 
 .progress-fill::after {
+    /* Maintien de l'effet de brillance "shimmer" pour un look moderne */
     content: '';
     position: absolute;
     top: 0;
@@ -315,6 +363,8 @@ main {
     flex-wrap: wrap;
 }
 
+/* --- 5. Styles des Boutons Génériques --- */
+
 .btn {
     padding: 0.6rem 1.2rem;
     border: none;
@@ -327,6 +377,11 @@ main {
 
 .btn:hover {
     transform: translateY(-2px);
+}
+
+.btn:focus-visible { /* Amélioration de l'accessibilité */
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
 }
 
 .btn-primary {
@@ -344,22 +399,33 @@ main {
     color: var(--text);
 }
 
+.btn-secondary:hover {
+    background: var(--text-light); /* Offrir un meilleur feedback au survol */
+    color: white;
+}
+
 .btn-danger {
     background: #ef4444;
     color: white;
 }
 
 .btn-like {
+    /* Utilisation de variables pour la couleur danger */
+    --danger-color: #ef4444;
     background: transparent;
-    border: 2px solid #ef4444;
-    color: #ef4444;
+    border: 2px solid var(--danger-color);
+    color: var(--danger-color);
     padding: 0.5rem 1rem;
+    /* Ajustement du border-radius pour ces petits boutons */
+    border-radius: 8px;
 }
 
 .btn-like.liked {
-    background: #ef4444;
+    background: var(--danger-color);
     color: white;
 }
+
+/* --- 6. Modale (Pop-up) --- */
 
 .modal {
     display: none;
@@ -369,7 +435,7 @@ main {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.7); /* Opacité légèrement augmentée pour un meilleur contraste */
     backdrop-filter: blur(5px);
     animation: fadeIn 0.3s ease;
 }
@@ -388,15 +454,15 @@ main {
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.4s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); /* Ombre plus prononcée */
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Courbe d'animation plus "rebondissante" */
     position: relative;
 }
 
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(50px) scale(0.9);
+        transform: translateY(100px) scale(0.9);
     }
     to {
         opacity: 1;
@@ -405,11 +471,11 @@ main {
 }
 
 .close {
+    /* Rendre le bouton de fermeture plus discret mais toujours cliquable */
     position: absolute;
-    right: 1.5rem;
-    top: 1.5rem;
-    font-size: 2rem;
-    font-weight: bold;
+    right: 1rem;
+    top: 1rem;
+    font-size: 1.5rem;
     cursor: pointer;
     color: var(--text-light);
     transition: all 0.3s ease;
@@ -423,9 +489,17 @@ main {
 
 .close:hover {
     background: var(--border);
-    color: var(--text);
+    color: var(--primary); /* Couleur principale au survol */
     transform: rotate(90deg);
 }
+
+.close:focus-visible { /* Amélioration de l'accessibilité */
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+
+/* --- 7. Formulaires --- */
 
 .form-group {
     margin-bottom: 1.5rem;
@@ -451,14 +525,26 @@ main {
     transition: all 0.3s ease;
 }
 
+/* Regroupement des focus pour tous les champs */
+.form-group input:not([type="range"]),
+.form-group textarea,
+.form-group select {
+    /* Ajout du focus pour le clavier */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 .form-group input[type="text"]:focus,
 .form-group textarea:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group input[type="text"]:focus-visible, /* Focus visible pour le clavier */
+.form-group textarea:focus-visible,
+.form-group select:focus-visible {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--hover-shadow);
 }
 
+/* Slider (Range Input) */
 .form-group input[type="range"] {
     width: 100%;
     height: 8px;
@@ -468,6 +554,7 @@ main {
     -webkit-appearance: none;
 }
 
+/* Styles des pouces de Slider pour tous les navigateurs */
 .form-group input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -480,8 +567,19 @@ main {
     transition: all 0.3s ease;
 }
 
-.form-group input[type="range"]::-webkit-slider-thumb:hover {
-    transform: scale(1.3);
+.form-group input[type="range"]::-moz-range-thumb { /* Ajout pour Firefox */
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 2px 10px var(--hover-shadow);
+    border: none; /* Important pour Firefox */
+}
+
+.form-group input[type="range"]::-webkit-slider-thumb:hover,
+.form-group input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.2);
 }
 
 .radio-group {
@@ -503,12 +601,14 @@ main {
     border-radius: 12px;
     margin-top: 1rem;
     animation: fadeIn 0.3s ease;
+    border: 1px solid var(--border); /* Ajout d'une bordure pour la démarcation */
 }
 
 .form-actions {
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+    justify-content: flex-end; /* Alignement à droite plus conventionnel */
 }
 
 .color-picker {
@@ -518,24 +618,27 @@ main {
 }
 
 .color-btn {
-    width: 50px;
-    height: 50px;
+    width: 40px; /* Légèrement plus petit */
+    height: 40px;
     border-radius: 50%;
     border: 3px solid transparent;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 5px var(--shadow);
 }
 
 .color-btn:hover {
-    transform: scale(1.2);
-    border-color: white;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: scale(1.15); /* Mise à l'échelle plus douce */
+    border-color: var(--primary); /* Utiliser la couleur principale pour la bordure de survol */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* --- 8. Commentaires --- */
+
 .comments-section {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid var(--border);
+    margin-top: 1.5rem; /* Augmentation de la marge */
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border); /* Bordure plus légère */
 }
 
 .comment {
@@ -544,10 +647,11 @@ main {
     border-radius: 12px;
     margin-bottom: 0.8rem;
     transition: all 0.3s ease;
+    border-left: 3px solid var(--text-light); /* Ajout d'une barre subtile */
 }
 
 .comment:hover {
-    transform: translateX(5px);
+    transform: translateX(3px); /* Moins de mouvement */
     box-shadow: 0 3px 10px var(--shadow);
 }
 
@@ -572,13 +676,22 @@ main {
     padding: 0.8rem;
     border: 2px solid var(--border);
     border-radius: 12px;
-    background: var(--bg);
+    background: var(--card-bg); /* Utilisation de card-bg pour le champ dans la carte */
     color: var(--text);
+}
+
+/* --- 9. Media Queries (Responsive) --- */
+
+@media (max-width: 992px) { /* Ajout d'un point d'arrêt */
+    .header-content {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 768px) {
     h1 {
-        font-size: 1.3rem;
+        font-size: 1.5rem; /* Ajustement pour H1 */
     }
 
     .goals-grid {
@@ -596,18 +709,21 @@ main {
     }
 }
 
+/* --- 10. Empty State --- */
+
 .empty-state {
     text-align: center;
-    padding: 3rem;
+    padding: 4rem; /* Plus de padding */
     color: var(--text-light);
+    background: var(--card-bg); /* Arrière-plan pour la démarcation */
+    border-radius: 15px;
+    box-shadow: 0 5px 15px var(--shadow);
+    margin-top: 2rem;
 }
 
 .empty-state-icon {
     font-size: 4rem;
     margin-bottom: 1rem;
-    opacity: 0.5;
-}
-@keyframes starTwinkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.2); }
+    opacity: 0.6;
+    color: var(--primary); /* Utilisation de la couleur principale */
 }
