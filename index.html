@@ -3,132 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Objectifs | Suivi Personnel</title>
+    <title>GoalTracker - Suivi d'Objectifs Premium</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Gradient Background Overlay -->
+    <div class="gradient-bg"></div>
 
+    <!-- Header Navigation -->
     <header>
-        <h1 class="logo"><i class="fas fa-bullseye"></i> GoalTracker</h1>
-        <nav>
-            <button id="view-public" class="nav-button active"><i class="fas fa-globe"></i> Public</button>
-            <button id="view-private" class="nav-button"><i class="fas fa-lock"></i> Privé</button>
-        </nav>
-        <div class="header-actions">
-            <button id="open-settings" class="icon-button settings-button" title="Paramètres">
-                <i class="fas fa-cog"></i>
-            </button>
-            <button id="add-goal-button" class="button-primary icon-button" title="Ajouter un objectif">
-                <i class="fas fa-plus"></i>
-            </button>
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h1 class="logo">GoalTracker</h1>
+            </div>
+            
+            <nav class="main-nav">
+                <button id="view-public" class="nav-button active" data-view="public">
+                    <i class="fas fa-globe"></i>
+                    <span>Public</span>
+                </button>
+                <button id="view-private" class="nav-button" data-view="private">
+                    <i class="fas fa-lock"></i>
+                    <span>Privé</span>
+                </button>
+            </nav>
+            
+            <div class="header-actions">
+                <button id="open-settings" class="icon-button settings-button" title="Paramètres">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button id="add-goal-button" class="button-primary" title="Nouvel objectif">
+                    <i class="fas fa-plus"></i>
+                    <span class="button-text">Nouvel Objectif</span>
+                </button>
+            </div>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main id="app-container">
+        <!-- Goals Grid -->
         <section id="goals-list" class="goals-container"></section>
         
-        <p id="empty-state" class="empty-state-message" style="display: none;">
-            <i class="fas fa-info-circle"></i> Aucun objectif à afficher dans cette catégorie.
-        </p>
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h3>Aucun objectif pour le moment</h3>
+            <p>Commencez votre voyage en créant votre premier objectif !</p>
+            <button class="button-primary" onclick="document.getElementById('add-goal-button').click()">
+                <i class="fas fa-plus"></i>
+                Créer un objectif
+            </button>
+        </div>
     </main>
 
-    <div id="goal-modal" class="modal animated">
-        <div class="modal-content">
-            <button class="close-button" data-close-modal="goal-modal"><i class="fas fa-times"></i></button>
-            <h2 id="modal-title">Créer un Objectif</h2>
-            <form id="goal-form">
-                <input type="hidden" id="goal-id">
+    <!-- Goal Modal -->
+    <div id="goal-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-content">
+                <button class="close-button" data-close-modal="goal-modal">
+                    <i class="fas fa-times"></i>
+                </button>
                 
-                <div class="form-group">
-                    <label for="title">Titre</label>
-                    <input type="text" id="title" placeholder="Ex: Apprendre l'Espagnol" required>
+                <div class="modal-header">
+                    <h2 id="modal-title">
+                        <i class="fas fa-bullseye"></i>
+                        Créer un Objectif
+                    </h2>
                 </div>
 
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea id="description" placeholder="Détaillez vos actions..." required></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group half-width">
-                        <label for="type">Période</label>
-                        <select id="type" required>
-                            <option value="jour">Jour</option>
-                            <option value="semaine">Semaine</option>
-                            <option value="mois">Mois</option>
-                            <option value="annee">Année</option>
-                        </select>
-                    </div>
-                    <div class="form-group half-width">
-                        <label for="progress">Progression (<span id="progress-value">0%</span>)</label>
-                        <input type="range" id="progress" min="0" max="100" value="0">
-                    </div>
-                </div>
-
-                <fieldset class="visibility-switch">
-                    <legend>Visibilité</legend>
-                    <label class="switch-label">
-                        <input type="radio" id="public-radio" name="visibility" value="public" checked> Public
-                    </label>
-                    <label class="switch-label">
-                        <input type="radio" id="private-radio" name="visibility" value="private"> Privé
-                    </label>
-                </fieldset>
-
-                <div id="public-options" class="public-options-group">
-                    <div class="form-group">
-                        <label for="display-name">Nom affiché</label>
-                        <input type="text" id="display-name" placeholder="Pseudo ou Nom Réel">
-                    </div>
+                <form id="goal-form" class="goal-form">
+                    <input type="hidden" id="goal-id">
                     
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="allow-comments" checked>
-                        Autoriser les commentaires
-                    </label>
-                </div>
+                    <div class="form-group">
+                        <label for="title">
+                            <i class="fas fa-heading"></i>
+                            Titre de l'objectif
+                        </label>
+                        <input type="text" id="title" placeholder="Ex: Apprendre une nouvelle langue" required>
+                    </div>
 
-                <button type="submit" class="button-primary"><i class="fas fa-save"></i> Sauvegarder</button>
-            </form>
+                    <div class="form-group">
+                        <label for="description">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea id="description" placeholder="Décrivez votre objectif en détails..." required rows="4"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="type">
+                                <i class="fas fa-calendar"></i>
+                                Période
+                            </label>
+                            <select id="type" required>
+                                <option value="jour">📅 Quotidien</option>
+                                <option value="semaine">📆 Hebdomadaire</option>
+                                <option value="mois">🗓️ Mensuel</option>
+                                <option value="annee">📋 Annuel</option>
+                            </select>
+                        </div>
+                        <div class="form-group half-width">
+                            <label for="progress">
+                                <i class="fas fa-chart-line"></i>
+                                Progression: <span id="progress-value" class="progress-value-display">0%</span>
+                            </label>
+                            <input type="range" id="progress" min="0" max="100" value="0">
+                        </div>
+                    </div>
+
+                    <div class="visibility-section">
+                        <label class="section-label">
+                            <i class="fas fa-eye"></i>
+                            Visibilité
+                        </label>
+                        <div class="visibility-toggle">
+                            <label class="radio-card">
+                                <input type="radio" id="public-radio" name="visibility" value="public" checked>
+                                <div class="radio-card-content">
+                                    <i class="fas fa-globe"></i>
+                                    <span class="radio-title">Public</span>
+                                    <span class="radio-desc">Visible par tous</span>
+                                </div>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" id="private-radio" name="visibility" value="private">
+                                <div class="radio-card-content">
+                                    <i class="fas fa-lock"></i>
+                                    <span class="radio-title">Privé</span>
+                                    <span class="radio-desc">Personnel uniquement</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="public-options" class="public-options">
+                        <div class="form-group">
+                            <label for="display-name">
+                                <i class="fas fa-user"></i>
+                                Nom affiché
+                            </label>
+                            <input type="text" id="display-name" placeholder="Votre pseudo ou nom">
+                        </div>
+                        
+                        <label class="checkbox-card">
+                            <input type="checkbox" id="allow-comments" checked>
+                            <div class="checkbox-content">
+                                <i class="fas fa-comments"></i>
+                                <div>
+                                    <span class="checkbox-title">Autoriser les commentaires</span>
+                                    <span class="checkbox-desc">Les autres utilisateurs pourront commenter</span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="button-secondary" onclick="document.querySelector('[data-close-modal=goal-modal]').click()">
+                            <i class="fas fa-times"></i>
+                            Annuler
+                        </button>
+                        <button type="submit" class="button-primary">
+                            <i class="fas fa-save"></i>
+                            Sauvegarder
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     
-    <div id="settings-modal" class="modal animated">
-        <div class="modal-content">
-            <button class="close-button" data-close-modal="settings-modal"><i class="fas fa-times"></i></button>
-            <h2><i class="fas fa-cog"></i> Paramètres du Site</h2>
-            
-            <div class="setting-section">
-                <h3>Thème de l'interface</h3>
-                <div class="theme-switcher">
-                    <button id="set-light-theme" class="theme-button"><i class="fas fa-sun"></i> Clair</button>
-                    <button id="set-dark-theme" class="theme-button"><i class="fas fa-moon"></i> Sombre</button>
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-content">
+                <button class="close-button" data-close-modal="settings-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="modal-header">
+                    <h2>
+                        <i class="fas fa-palette"></i>
+                        Personnalisation
+                    </h2>
                 </div>
-            </div>
+                
+                <div class="settings-content">
+                    <div class="setting-section">
+                        <h3>
+                            <i class="fas fa-moon"></i>
+                            Thème d'affichage
+                        </h3>
+                        <div class="theme-switcher">
+                            <button id="set-light-theme" class="theme-button active">
+                                <i class="fas fa-sun"></i>
+                                <span>Clair</span>
+                            </button>
+                            <button id="set-dark-theme" class="theme-button">
+                                <i class="fas fa-moon"></i>
+                                <span>Sombre</span>
+                            </button>
+                        </div>
+                    </div>
 
-            <div class="setting-section">
-                <h3>Couleur d'accentuation</h3>
-                <div class="color-picker-group">
-                    <input type="color" id="color-picker">
-                    <p>Changez la couleur principale des boutons et accents.</p>
+                    <div class="setting-section">
+                        <h3>
+                            <i class="fas fa-droplet"></i>
+                            Couleur d'accentuation
+                        </h3>
+                        <div class="color-picker-section">
+                            <div class="color-presets">
+                                <button class="color-preset" data-color="#007bff" style="background: linear-gradient(135deg, #007bff, #0056b3)"></button>
+                                <button class="color-preset" data-color="#10b981" style="background: linear-gradient(135deg, #10b981, #059669)"></button>
+                                <button class="color-preset" data-color="#f59e0b" style="background: linear-gradient(135deg, #f59e0b, #d97706)"></button>
+                                <button class="color-preset" data-color="#8b5cf6" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)"></button>
+                                <button class="color-preset" data-color="#ef4444" style="background: linear-gradient(135deg, #ef4444, #dc2626)"></button>
+                                <button class="color-preset" data-color="#ec4899" style="background: linear-gradient(135deg, #ec4899, #db2777)"></button>
+                            </div>
+                            <div class="color-custom">
+                                <label for="color-picker">
+                                    <i class="fas fa-palette"></i>
+                                    Couleur personnalisée
+                                </label>
+                                <input type="color" id="color-picker" value="#007bff">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="comments-modal" class="modal animated">
-        <div class="modal-content">
-            <button class="close-button" data-close-modal="comments-modal"><i class="fas fa-times"></i></button>
-            <h2 id="comments-title"><i class="fas fa-comments"></i> Commentaires</h2>
-            <div id="comments-list" class="comments-list"></div>
-            <div class="comment-input-area">
-                <textarea id="new-comment-text" placeholder="Ajouter un commentaire..." rows="2"></textarea>
-                <button id="submit-comment" class="button-primary" disabled>Poster</button>
+    <!-- Comments Modal -->
+    <div id="comments-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <div class="modal-content">
+                <button class="close-button" data-close-modal="comments-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <div class="modal-header">
+                    <h2 id="comments-title">
+                        <i class="fas fa-comments"></i>
+                        Commentaires
+                    </h2>
+                </div>
+                
+                <div id="comments-list" class="comments-list"></div>
+                
+                <div class="comment-input-section">
+                    <textarea id="new-comment-text" placeholder="Partagez vos encouragements..." rows="3"></textarea>
+                    <button id="submit-comment" class="button-primary" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                        Publier
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <script src="script.js"></script>
 </body>
 </html>
