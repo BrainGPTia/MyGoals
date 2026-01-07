@@ -3,150 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracker d'Objectifs</title>
+    <title>Focus & Zen - Espace de Concentration Minimaliste</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <meta name="description" content="Espace de travail et de concentration minimaliste avec minuteur Pomodoro, To-Do list et musique d'ambiance.">
+    <meta name="keywords" content="focus, pomodoro, to-do list, minimaliste, zen, productivité">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>🎯 Mes Objectifs</h1>
-            <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
-        </div>
+
+    <header id="taskbar">
+        <div id="logo">Focus & Zen</div>
+        <nav id="main-nav">
+            <div id="audio-controls-group">
+                <span id="current-track-info" class="track-info" title="Titre de la piste en cours">Chargement...</span>
+                <button id="audio-toggle-button" title="Lecture / Pause" aria-label="Lecture / Pause"><i class="fas fa-play"></i></button>
+                <button id="next-track-button" title="Piste suivante" aria-label="Piste suivante"><i class="fas fa-forward"></i></button>
+            </div>
+            
+            <button id="home-button" class="nav-button active-nav-button" data-target="focus-page" title="Retour à l'espace de travail" aria-label="Accueil"><i class="fas fa-home"></i> Accueil</button>
+            <button id="faq-button" class="nav-button" data-target="faq-page" title="En savoir plus sur la méthode" aria-label="Pourquoi"><i class="fas fa-question-circle"></i> Pourquoi ?</button>
+            <button id="settings-button" class="nav-button" title="Ouvrir les réglages" aria-label="Paramètres"><i class="fas fa-cog"></i> Paramètres</button>
+        </nav>
     </header>
 
-    <nav class="main-nav">
-        <button class="nav-btn active" data-section="public">📢 Objectifs Publics</button>
-        <button class="nav-btn" data-section="private">🔒 Objectifs Privés</button>
-    </nav>
+    <audio id="background-audio" preload="auto" loop></audio>
 
-    <nav class="secondary-nav">
-        <button class="secondary-btn" data-section="comments">💬 Mes Commentaires</button>
-        <button class="secondary-btn" data-section="likes">❤️ Mes Likes</button>
-    </nav>
+    <section id="focus-page" class="page-section visible-page-section">
+        <main id="main-content">
 
-    <main>
-        <button id="addGoalBtn" class="add-btn">✨ Nouvel Objectif</button>
+            <section id="quote-section" class="card fade-in">
+                <h2><i class="fas fa-feather-alt"></i> Inspiration</h2>
+                <p id="motivational-quote" class="quote-text">"La simplicité est la sophistication suprême." - Leonardo da Vinci</p>
+                <button id="change-quote-button" class="quote-button" title="Changer de citation">
+                    <i class="fas fa-sync-alt"></i> Nouvelle citation
+                </button>
+            </section>
 
-        <section id="publicSection" class="goals-section active">
-            <div id="publicGoals" class="goals-grid"></div>
-        </section>
+            <section id="goal-section" class="card fade-in delay-1">
+                <h2>🎯 Mon Objectif Focus Unique</h2>
+                <input type="text" id="daily-goal" placeholder="Écrire un seul objectif S.M.A.R.T. (ex: Finaliser la section 3 du rapport)" maxlength="100" aria-label="Objectif principal">
+                <p class="section-info">Concentrez-vous sur UN SEUL objectif majeur par session.</p>
+            </section>
 
-        <section id="privateSection" class="goals-section">
-            <div id="privateGoals" class="goals-grid"></div>
-        </section>
+            <div id="grid-container">
 
-        <section id="commentsSection" class="goals-section">
-            <div id="myComments" class="goals-grid"></div>
-        </section>
-
-        <section id="likesSection" class="goals-section">
-            <div id="myLikes" class="goals-grid"></div>
-        </section>
-    </main>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle">✨ Nouvel Objectif</h2>
-            <form id="goalForm">
-                <div class="form-group">
-                    <label>📝 Titre *</label>
-                    <input type="text" id="goalTitle" required placeholder="Mon objectif...">
-                </div>
-                <div class="form-group">
-                    <label>📄 Description</label>
-                    <textarea id="goalDescription" rows="3" placeholder="Détails de mon objectif..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>📅 Type d'objectif *</label>
-                    <select id="goalType" required>
-                        <option value="day">Jour</option>
-                        <option value="week">Semaine</option>
-                        <option value="month">Mois</option>
-                        <option value="year">Année</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>📊 Progression : <span id="progressValue">0</span>%</label>
-                    <input type="range" id="goalProgress" min="0" max="100" value="0">
-                </div>
-                <div class="form-group">
-                    <label>👁️ Visibilité</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="visibility" value="private" checked> 🔒 Privé</label>
-                        <label><input type="radio" name="visibility" value="public"> 📢 Public</label>
+                <section id="todo-section" class="card fade-in delay-2">
+                    <h2>✅ Ma To-Do List Secondaire</h2>
+                    <div id="todo-input-container">
+                        <input type="text" id="new-todo" placeholder="Ajouter une tâche rapide..." aria-label="Nouvelle tâche">
+                        <button id="add-todo-button" title="Ajouter la tâche à la liste" aria-label="Ajouter tâche"><i class="fas fa-plus"></i> Ajouter</button>
                     </div>
-                </div>
-                <div id="publicOptions" class="public-options">
-                    <div class="form-group">
-                        <label>👤 Nom affiché</label>
-                        <select id="displayName">
-                            <option value="real">Nom réel</option>
-                            <option value="pseudo">Pseudo</option>
-                            <option value="anonymous">Anonyme</option>
-                        </select>
+                    <ul id="todo-list" aria-label="Liste des tâches"></ul>
+                    <div class="list-summary">
+                        <p>Total tâches: <span id="todo-count">0</span></p>
                     </div>
-                    <div class="form-group">
-                        <input type="text" id="pseudoInput" placeholder="Entrez votre pseudo" style="display: none;">
-                        <input type="text" id="realNameInput" placeholder="Entrez votre nom" style="display: none;">
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="allowComments" checked> 💬 Autoriser les commentaires</label>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">❌ Annuler</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                </section>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeSettings">&times;</span>
-            <h2>⚙️ Paramètres</h2>
-            <div class="form-group">
-                <label>🌓 Thème</label>
-                <select id="themeSelect">
-                    <option value="light">☀️ Clair</option>
-                    <option value="dark">🌙 Sombre</option>
-                </select>
+                <section id="pomodoro-section" class="card fade-in delay-3">
+                    <h2>⏳ Minuteur Pomodoro</h2>
+                    <div id="timer-display" title="Temps restant" aria-live="polite" aria-atomic="true">25:00</div>
+                    <div id="timer-controls">
+                        <button id="start-timer" title="Démarrer ou mettre en pause le minuteur" aria-label="Démarrer/Pause"><i class="fas fa-play"></i> Démarrer Focus</button>
+                        <button id="reset-timer" title="Réinitialiser la session actuelle" aria-label="Réinitialiser"><i class="fas fa-redo"></i> Réinitialiser</button>
+                    </div>
+                    <p id="timer-status" class="session-info">Prêt pour Focus (25 min)</p>
+                    
+                    <div class="pomodoro-durations">
+                        <div class="duration-item">
+                            <label for="work-duration-inline">Durée Focus (min)</label>
+                            <input type="number" id="work-duration-inline" value="25" min="1" max="60" class="small-input" aria-label="Durée de travail">
+                        </div>
+                        <div class="duration-item">
+                            <label for="break-duration-inline">Durée Pause (min)</label>
+                            <input type="number" id="break-duration-inline" value="5" min="1" max="30" class="small-input" aria-label="Durée de pause">
+                        </div>
+                    </div>
+                    
+                    <div class="pomodoro-stats">
+                        <p>Sessions complétées : <span id="session-count">0</span></p>
+                    </div>
+                </section>
             </div>
-            <div class="form-group">
-                <label>🎨 Couleur principale</label>
-                <div class="color-picker">
-                    <button type="button" class="color-btn" data-color="#6366f1" style="background: #6366f1;"></button>
-                    <button type="button" class="color-btn" data-color="#ec4899" style="background: #ec4899;"></button>
-                    <button type="button" class="color-btn" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
-                    <button type="button" class="color-btn" data-color="#f59e0b" style="background: #f59e0b;"></button>
-                    <button type="button" class="color-btn" data-color="#10b981" style="background: #10b981;"></button>
-                    <button type="button" class="color-btn" data-color="#3b82f6" style="background: #3b82f6;"></button>
+            
+            <section id="drawing-section" class="card full-width-card fade-in delay-4">
+                <h2>🎨 Zone de Réflexion (Doodling)</h2>
+                
+                <div class="drawing-toolbar">
+                    <div class="tool-group">
+                        <button id="tool-pencil" class="tool-button active-tool" title="Crayon" aria-label="Crayon">
+                            <i class="fas fa-pencil-alt"></i> Crayon
+                        </button>
+                        <button id="tool-eraser" class="tool-button" title="Gomme" aria-label="Gomme">
+                            <i class="fas fa-eraser"></i> Gomme
+                        </button>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label for="color-picker" class="color-label">
+                            <i class="fas fa-palette"></i> Couleur
+                        </label>
+                        <input type="color" id="color-picker" value="#333333" title="Sélectionner une couleur" aria-label="Sélectionner une couleur">
+                    </div>
+                    
+                    <div class="tool-group">
+                        <label for="brush-size" class="brush-label">
+                            <i class="fas fa-circle"></i> Taille
+                        </label>
+                        <input type="range" id="brush-size" min="1" max="20" value="3" title="Taille du pinceau" aria-label="Taille du pinceau">
+                        <span id="brush-size-value">3</span>
+                    </div>
                 </div>
+                
+                <canvas id="drawing-canvas" class="neumorphic-canvas" aria-label="Zone de dessin"></canvas> 
+                <div class="canvas-controls">
+                    <button id="clear-canvas" title="Effacer tout le contenu du tableau blanc" aria-label="Effacer le tableau"><i class="fas fa-trash"></i> Tout effacer</button>
+                </div>
+            </section>
+
+        </main>
+    </section>
+
+    <section id="faq-page" class="page-section hidden-page-section">
+        <div id="faq-content">
+            <div class="faq-introduction">
+                <p>Bienvenue sur la page "Pourquoi ?". Cette section détaille la philosophie et les choix de conception derrière Focus & Zen.</p>
             </div>
         </div>
+    </section>
+
+    <div id="modal-overlay" class="hidden-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <button class="close-modal-button" title="Fermer la fenêtre de dialogue" aria-label="Fermer">&times;</button>
+            
+            <div id="settings-modal" class="modal-page">
+                <h2 id="modal-title"><i class="fas fa-cog"></i> Réglages & Personnalisation</h2>
+                
+                <div class="setting-item">
+                    <label for="theme-switch">Mode Sombre / Clair</label>
+                    <input type="checkbox" id="theme-switch" role="switch" aria-label="Basculer le thème sombre">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="animation-switch">Transitions Fluides</label>
+                    <input type="checkbox" id="animation-switch" checked role="switch" aria-label="Activer les animations">
+                </div>
+                
+                <div class="setting-item">
+                    <label for="volume-slider">Volume Musique d'Ambiance</label>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5" aria-label="Volume audio">
+                </div>
+                
+                <p class="setting-info">Les réglages sont stockés localement sur cet appareil (navigateur).</p>
+            </div>
+        </div>
     </div>
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
-    
-    <script>
-      // Configuration Firebase (remplace les valeurs par celles de ton projet)
-      const firebaseConfig = {
-        apiKey: "AIzaSyC1Fs9gu6E1ROpoX8A-codMgaAfxzW0x7o",
-    authDomain: "mygoals-e3cbb.firebaseapp.com",
-    projectId: "mygoals-e3cbb",
-    storageBucket: "mygoals-e3cbb.firebasestorage.app",
-    messagingSenderId: "314414000182",
-    appId: "1:314414000182:web:d89491086bb56fdc771097",
-    measurementId: "G-FLTJQ3Z259"
-      };
-
-      // Initialisation Firebase
-      firebase.initializeApp(firebaseConfig);
-      firebase.analytics();
-    </script>
 
     <script src="script.js"></script>
 </body>
