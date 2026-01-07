@@ -17,13 +17,13 @@
         <nav id="main-nav">
             <div id="audio-controls-group">
                 <span id="current-track-info" class="track-info" title="Titre de la piste en cours">Chargement...</span>
-                <button id="audio-toggle-button" title="Lecture / Pause" aria-label="Lecture / Pause"><i class="fas fa-play"></i></button>
-                <button id="next-track-button" title="Piste suivante" aria-label="Piste suivante"><i class="fas fa-forward"></i></button>
+                <button id="audio-toggle-button" type="button" title="Lecture / Pause" aria-label="Lecture / Pause"><i class="fas fa-play"></i></button>
+                <button id="next-track-button" type="button" title="Piste suivante" aria-label="Piste suivante"><i class="fas fa-forward"></i></button>
             </div>
             
-            <button id="home-button" class="nav-button active-nav-button" data-target="focus-page" title="Retour à l'espace de travail" aria-label="Accueil"><i class="fas fa-home"></i> Accueil</button>
-            <button id="faq-button" class="nav-button" data-target="faq-page" title="En savoir plus sur la méthode" aria-label="Pourquoi"><i class="fas fa-question-circle"></i> Pourquoi ?</button>
-            <button id="settings-button" class="nav-button" title="Ouvrir les réglages" aria-label="Paramètres"><i class="fas fa-cog"></i> Paramètres</button>
+            <button id="home-button" type="button" class="nav-button active-nav-button" data-target="focus-page" title="Retour à l'espace de travail" aria-label="Accueil"><i class="fas fa-home"></i> Accueil</button>
+            <button id="faq-button" type="button" class="nav-button" data-target="faq-page" title="En savoir plus sur la méthode" aria-label="Pourquoi"><i class="fas fa-question-circle"></i> Pourquoi ?</button>
+            <button id="settings-button" type="button" class="nav-button" title="Ouvrir les réglages" aria-label="Paramètres"><i class="fas fa-cog"></i> Paramètres</button>
         </nav>
     </header>
 
@@ -35,7 +35,7 @@
             <section id="quote-section" class="card fade-in">
                 <h2><i class="fas fa-feather-alt"></i> Inspiration</h2>
                 <p id="motivational-quote" class="quote-text">"La simplicité est la sophistication suprême." - Leonardo da Vinci</p>
-                <button id="change-quote-button" class="quote-button" title="Changer de citation">
+                <button id="change-quote-button" type="button" class="quote-button" title="Changer de citation">
                     <i class="fas fa-sync-alt"></i> Nouvelle citation
                 </button>
             </section>
@@ -52,7 +52,7 @@
                     <h2>✅ Ma To-Do List Secondaire</h2>
                     <div id="todo-input-container">
                         <input type="text" id="new-todo" placeholder="Ajouter une tâche rapide..." aria-label="Nouvelle tâche">
-                        <button id="add-todo-button" title="Ajouter la tâche à la liste" aria-label="Ajouter tâche"><i class="fas fa-plus"></i> Ajouter</button>
+                        <button id="add-todo-button" type="button" title="Ajouter la tâche à la liste" aria-label="Ajouter tâche"><i class="fas fa-plus"></i> Ajouter</button>
                     </div>
                     <ul id="todo-list" aria-label="Liste des tâches"></ul>
                     <div class="list-summary">
@@ -64,8 +64,8 @@
                     <h2>⏳ Minuteur Pomodoro</h2>
                     <div id="timer-display" title="Temps restant" aria-live="polite" aria-atomic="true">25:00</div>
                     <div id="timer-controls">
-                        <button id="start-timer" title="Démarrer ou mettre en pause le minuteur" aria-label="Démarrer/Pause"><i class="fas fa-play"></i> Démarrer Focus</button>
-                        <button id="reset-timer" title="Réinitialiser la session actuelle" aria-label="Réinitialiser"><i class="fas fa-redo"></i> Réinitialiser</button>
+                        <button id="start-timer" type="button" title="Démarrer ou mettre en pause le minuteur" aria-label="Démarrer/Pause"><i class="fas fa-play"></i> Démarrer Focus</button>
+                        <button id="reset-timer" type="button" title="Réinitialiser la session actuelle" aria-label="Réinitialiser"><i class="fas fa-redo"></i> Réinitialiser</button>
                     </div>
                     <p id="timer-status" class="session-info">Prêt pour Focus (25 min)</p>
                     
@@ -91,10 +91,10 @@
                 
                 <div class="drawing-toolbar">
                     <div class="tool-group">
-                        <button id="tool-pencil" class="tool-button active-tool" title="Crayon" aria-label="Crayon">
+                        <button id="tool-pencil" type="button" class="tool-button active-tool" title="Crayon" aria-label="Crayon">
                             <i class="fas fa-pencil-alt"></i> Crayon
                         </button>
-                        <button id="tool-eraser" class="tool-button" title="Gomme" aria-label="Gomme">
+                        <button id="tool-eraser" type="button" class="tool-button" title="Gomme" aria-label="Gomme">
                             <i class="fas fa-eraser"></i> Gomme
                         </button>
                     </div>
@@ -117,7 +117,7 @@
                 
                 <canvas id="drawing-canvas" class="neumorphic-canvas" aria-label="Zone de dessin"></canvas> 
                 <div class="canvas-controls">
-                    <button id="clear-canvas" title="Effacer tout le contenu du tableau blanc" aria-label="Effacer le tableau"><i class="fas fa-trash"></i> Tout effacer</button>
+                    <button id="clear-canvas" type="button" title="Effacer tout le contenu du tableau blanc" aria-label="Effacer le tableau"><i class="fas fa-trash"></i> Tout effacer</button>
                 </div>
             </section>
 
@@ -134,7 +134,7 @@
 
     <div id="modal-overlay" class="hidden-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
-            <button class="close-modal-button" title="Fermer la fenêtre de dialogue" aria-label="Fermer">&times;</button>
+            <button class="close-modal-button" type="button" title="Fermer la fenêtre de dialogue" aria-label="Fermer">&times;</button>
             
             <div id="settings-modal" class="modal-page">
                 <h2 id="modal-title"><i class="fas fa-cog"></i> Réglages & Personnalisation</h2>
