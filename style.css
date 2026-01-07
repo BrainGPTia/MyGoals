@@ -1,296 +1,261 @@
-/* --- 1. Reset & Variables de Base --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ========================================================== */
+/* 1. VARIABLES GLOBALES ET THÈMES */
+/* ========================================================== */
+:root {
+    /* Couleurs de Base - Thème Clair */
+    --bg-color: #f0f3f6; 
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --accent-color: #4a90e2; 
+    --secondary-accent: #3a7bd5; 
+    --warning-color: #f44336;
+    --success-color: #28a745;
+    
+    /* Neumorphisme/Soft UI */
+    --shadow-light: -6px -6px 14px rgba(255, 255, 255, 0.9); 
+    --shadow-dark: 6px 6px 14px rgba(0, 0, 0, 0.15);
+    --inner-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.1), inset -3px -3px 6px rgba(255, 255, 255, 0.7);
+    
+    --border-radius: 20px;
+    --transition-speed: 0.25s;
+    --taskbar-height: 70px; 
+    --save-color: #8A2BE2;
 }
 
-:root {
-    /* Palettes de Couleurs - Facilement modifiables */
-    --primary: #6366f1; /* Bleu-Violet */
-    --bg: #f8fafc;
-    --card-bg: #ffffff;
-    --text: #1e293b;
-    --text-light: #64748b;
-    --border: #e2e8f0;
-    --shadow: rgba(0, 0, 0, 0.1);
-    --hover-shadow: rgba(99, 102, 241, 0.3);
+/* Mode Sombre */
+body.dark-mode {
+    --bg-color: #161c24; 
+    --text-color: #e0e0e0;
+    --card-bg: #212932;
+    --accent-color: #90b8f8; 
+    --secondary-accent: #6d93f6;
+    
+    --shadow-light: -6px -6px 14px rgba(33, 41, 50, 0.8); 
+    --shadow-dark: 6px 6px 14px rgba(0, 0, 0, 0.8); 
+    --inner-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.5), inset -3px -3px 6px rgba(33, 41, 50, 0.7);
+}
 
-    /* Variables pour les Gradients */
-    --gradient-start: var(--primary);
-    --gradient-end-h1: #ec4899;
-    --gradient-end-progress: #8b5cf6;
+/* Base Reset & Typography */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    transition: background 0.3s ease, color 0.3s ease;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    min-height: 100vh;
+    overflow-x: hidden; 
 }
 
-/* Thème Sombre */
-body.dark {
-    --bg: #0f172a;
-    --card-bg: #1e293b;
-    --text: #f1f5f9;
-    --text-light: #94a3b8;
-    --border: #334155;
-    --shadow: rgba(0, 0, 0, 0.4);
+button, input, .card, .nav-button {
+    transition: all var(--transition-speed) ease;
 }
 
-/* --- Keyframes pour les nouvelles animations --- */
-
-/* Effet de pulsation (utilisé pour les boutons principaux) */
-@keyframes pulse-shadow {
-    0% { box-shadow: 0 0 0 0px var(--hover-shadow); }
-    50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
-    100% { box-shadow: 0 0 0 0px rgba(99, 102, 241, 0); }
-}
-
-/* Effet d'onde (utilisé sur les boutons actifs/cliqués) */
-@keyframes ripple {
-    from {
-        transform: scale(0);
-        opacity: 1;
-    }
-    to {
-        transform: scale(3);
-        opacity: 0;
-    }
-}
-
-/* --- 2. Header & Navigation --- */
-
-header {
-    background: var(--card-bg);
-    padding: 1.5rem;
-    box-shadow: 0 2px 10px var(--shadow);
-    position: sticky;
+/* ========================================================== */
+/* 2. BARRE DE TÂCHES (NAVIGATION & AUDIO) */
+/* ========================================================== */
+#taskbar {
+    position: fixed;
     top: 0;
-    z-index: 100;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-.header-content {
-    max-width: 1200px;
-    margin: 0 auto;
+    left: 0;
+    width: 100%;
+    height: var(--taskbar-height);
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); 
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0 3%; 
 }
 
-h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end-h1));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+#logo {
+    font-size: 1.8em;
+    font-weight: 800;
+    color: var(--accent-color);
+    letter-spacing: 0.5px;
 }
 
-/* AMÉLIORATION : Bouton d'Icône (pour le Dark Mode Toggle ou Paramètres) */
-.icon-btn {
-    background: transparent; /* Changement : Transparent pour s'intégrer mieux */
-    border: 2px solid var(--border);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    font-size: 1.3rem;
+#main-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    padding: 10px 18px;
+    font-size: 1em;
     cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text-light);
-    position: relative;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.nav-button:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.nav-button:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.active-nav-button {
+    color: var(--accent-color);
+    font-weight: 700;
+    border-bottom: 2px solid var(--accent-color);
+    border-radius: 0;
+}
+
+/* Contrôles Audio */
+#audio-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    background-color: var(--bg-color);
+    box-shadow: var(--inner-shadow);
+}
+
+#current-track-info {
+    font-size: 0.9em;
+    color: var(--text-color);
+    min-width: 100px;
+    max-width: 200px;
+    text-align: center;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#audio-toggle-button, #next-track-button {
+    padding: 8px;
+    background: var(--card-bg);
+    border: none;
+    border-radius: 50%;
+    color: var(--accent-color);
+    cursor: pointer;
+    box-shadow: var(--shadow-dark), var(--shadow-light);
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.icon-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+#audio-toggle-button:hover, #next-track-button:hover {
+    background-color: var(--accent-color);
+    color: white;
     transform: scale(1.05);
 }
 
-.icon-btn:active::after { /* Effet d'onde (ripple) au clic */
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: var(--primary);
-    border-radius: 50%;
-    opacity: 0.5;
-    animation: ripple 0.6s ease-out;
+#audio-toggle-button:focus, #next-track-button:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
-.icon-btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
-}
-
-.main-nav {
-    background: var(--card-bg);
-    padding: 1rem;
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    box-shadow: 0 2px 8px var(--shadow);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* AMÉLIORATION : Boutons de Navigation */
-.nav-btn {
-    padding: 0.8rem 2rem;
-    border: 2px solid var(--border);
-    background: transparent;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Lueur (Shine effect) */
-.nav-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.5s;
-}
-
-.nav-btn:hover::before {
-    left: 100%;
-}
-
-.nav-btn:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px var(--hover-shadow);
-}
-
-.nav-btn.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 5px 15px var(--hover-shadow);
-    /* AMÉLIORATION : Lueur subtile pour l'état actif */
-    animation: pulse-shadow 2s infinite;
-}
-
-.nav-btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
-}
-
-.secondary-nav {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    padding: 1rem;
-    flex-wrap: wrap;
-}
-
-/* AMÉLIORATION : Boutons Secondaires (Effet de profondeur) */
-.secondary-btn {
-    padding: 0.6rem 1.5rem;
-    border: none;
-    background: var(--card-bg);
-    border-radius: 20px;
-    cursor: pointer;
-    color: var(--text);
-    font-weight: 500;
-    transition: all 0.3s ease, box-shadow 0.1s ease; /* Transition rapide pour le box-shadow */
-    box-shadow: 0 4px 0 var(--text-light); /* Ombre pour l'effet 3D */
-    position: relative;
-    top: 0;
-}
-
-.secondary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 var(--text-light); /* Augmentation de l'ombre */
-}
-
-.secondary-btn:active {
-    transform: translateY(2px); /* Bouton "pressé" */
-    box-shadow: 0 2px 0 var(--text-light);
-    background: var(--primary);
-    color: white;
-}
-
-.secondary-btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
-}
-
-/* --- 3. Contenu Principal & Bouton Ajouter --- */
-
-main {
+/* ========================================================== */
+/* 3. GESTION DES PAGES ET CARTES */
+/* ========================================================== */
+.page-section {
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    margin: 0 auto;
+    padding: calc(var(--taskbar-height) + 30px) 20px 30px; 
+    transition: opacity var(--transition-speed), transform var(--transition-speed);
+    min-height: calc(100vh - var(--taskbar-height));
 }
 
-/* AMÉLIORATION : Bouton Ajouter (Glow au survol) */
-.add-btn {
-    background: linear-gradient(135deg, var(--primary), var(--gradient-end-progress));
-    color: white;
-    border: none;
-    padding: 1rem 2.5rem;
-    border-radius: 30px;
-    font-size: 1.1rem;
+.hidden-page-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    visibility: hidden;
+}
+
+.visible-page-section {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    position: relative; 
+}
+
+#main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow-dark), var(--shadow-light);
+}
+
+.card:hover {
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--secondary-accent); 
+}
+
+h2 {
+    color: var(--accent-color);
+    margin-bottom: 20px;
     font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 2rem;
-    box-shadow: 0 5px 20px var(--hover-shadow);
-    transition: all 0.3s ease;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
+    font-size: 1.5em;
+    border-bottom: 2px solid rgba(74, 144, 226, 0.1);
+    padding-bottom: 10px;
 }
 
-.add-btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px var(--hover-shadow);
+.section-info {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 15px;
+    font-style: italic;
+    border-top: 1px dashed rgba(153, 153, 153, 0.1);
+    padding-top: 10px;
 }
 
-.add-btn:active {
-    transform: translateY(0); /* Retour à la position normale */
-    box-shadow: 0 4px 10px var(--hover-shadow);
+#grid-container {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: 1fr;
 }
 
-.add-btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 4px;
-    animation: pulse-shadow 1.5s infinite; /* Pulsation lors du focus */
+@media (min-width: 768px) {
+    #grid-container {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
-
-/* --- 4. Section Objectifs (Goals) --- */
-
-.goals-section {
-    display: none;
-    animation: fadeIn 0.5s ease;
+/* Animations d'entrée plus douces */
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
 }
 
-.goals-section.active {
-    display: block;
-}
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(15px);
     }
     to {
         opacity: 1;
@@ -298,474 +263,705 @@ main {
     }
 }
 
-.goals-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.goal-card {
-    background: var(--card-bg);
-    border-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 15px var(--shadow);
-    transition: all 0.3s ease;
-    border: none;
-    position: relative;
-    overflow: hidden;
-}
-
-.goal-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
+/* ========================================================== */
+/* 4. FORMULAIRES ET ÉLÉMENTS INTERACTIFS */
+/* ========================================================== */
+input[type="text"], input[type="number"] {
     width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--primary), var(--gradient-end-h1), var(--gradient-end-progress));
-    z-index: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1em;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-shadow: var(--inner-shadow);
+    transition: box-shadow 0.2s;
 }
 
-.goal-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px var(--hover-shadow);
+input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    background-color: var(--card-bg);
+    box-shadow: 0 0 0 3px var(--accent-color) inset; 
 }
 
-.goal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
+.small-input {
+    width: 70px;
+    text-align: center;
+    padding: 10px;
+    font-size: 1em;
 }
 
-.goal-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.5rem;
+/* Objectif - Style simplifié */
+#daily-goal {
+    width: 100%;
 }
 
-.goal-type {
-    background: var(--primary);
-    color: white;
-    padding: 0.3rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
+/* Boutons Primaires */
+#add-todo-button, #start-timer {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
     font-weight: 600;
-    align-self: flex-start;
+    cursor: pointer;
+    box-shadow: var(--shadow-dark), var(--shadow-light); 
+    background-color: var(--accent-color);
+    color: white;
 }
 
-.goal-description {
-    color: var(--text-light);
-    margin-bottom: 1rem;
-    line-height: 1.6;
+#add-todo-button:hover, #start-timer:hover {
+    background-color: var(--secondary-accent);
+    transform: translateY(-1px);
 }
 
-.progress-container {
-    margin-bottom: 1rem;
+#add-todo-button:focus, #start-timer:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
-.progress-label {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-light);
+button {
+    cursor: pointer;
 }
 
-.progress-bar {
-    width: 100%;
-    height: 10px;
-    background: var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
+/* Citation */
+.quote-text {
+    font-size: 1.2em;
+    font-style: italic;
+    margin: 15px 0;
+    line-height: 1.8;
 }
 
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--gradient-end-progress));
-    border-radius: 10px;
-    transition: width 0.5s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-.goal-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-/* --- 5. Styles des Boutons Génériques (btn) --- */
-
-.btn {
-    padding: 0.6rem 1.2rem;
+.quote-button {
+    padding: 10px 20px;
     border: none;
-    border-radius: 15px;
+    border-radius: 10px;
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 2px 6px rgba(74, 144, 226, 0.25);
+    transition: all 0.2s ease;
+}
+
+.quote-button:hover {
+    background-color: var(--secondary-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(74, 144, 226, 0.3);
+}
+
+.quote-button:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* ========================================================== */
+/* 5. TO-DO LIST */
+/* ========================================================== */
+#todo-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#new-todo {
+    flex: 1;
+}
+
+#todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+#todo-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: var(--inner-shadow);
+    transition: all 0.2s;
+}
+
+#todo-list li:hover {
+    transform: translateX(3px);
+}
+
+#todo-list li.completed span {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+#todo-list li input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: var(--accent-color);
+}
+
+#todo-list li span {
+    flex: 1;
+    cursor: pointer;
+    word-break: break-word;
+}
+
+#todo-list li button {
+    background: none;
+    border: none;
+    color: var(--warning-color);
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+}
+
+#todo-list li button:hover {
+    transform: scale(1.15);
+}
+
+#todo-list li button:focus {
+    outline: 2px solid var(--warning-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.list-summary {
+    text-align: right;
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 10px;
+}
+
+/* ========================================================== */
+/* 6. MINUTEUR POMODORO */
+/* ========================================================== */
+#timer-display {
+    font-size: 5.5em;
+    font-weight: 200; 
+    text-align: center;
+    margin: 25px 0;
+    color: var(--accent-color);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
+    font-variant-numeric: tabular-nums;
+}
+
+#timer-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+#timer-controls button {
+    flex: 1;
+    max-width: 200px;
+}
+
+#reset-timer {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-dark), var(--shadow-light);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+#reset-timer:hover {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+#reset-timer:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.session-info {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+}
+
+/* Durées intégrées dans la carte Pomodoro */
+.pomodoro-durations {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    box-shadow: var(--inner-shadow);
+}
+
+.duration-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.duration-item label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.pomodoro-stats {
+    text-align: center;
+    font-size: 0.9em;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(153, 153, 153, 0.1);
+}
+
+.pomodoro-stats span {
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+/* ========================================================== */
+/* 7. ZONE DE DESSIN */
+/* ========================================================== */
+.drawing-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: var(--inner-shadow);
+    align-items: center;
+}
+
+.tool-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tool-button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    position: relative; /* Pour l'effet active */
+    box-shadow: var(--shadow-dark), var(--shadow-light);
+    transition: all 0.2s;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-.btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
-}
-
-.btn-primary {
-    background: var(--primary);
+.tool-button:hover {
+    background-color: var(--accent-color);
     color: white;
-    box-shadow: 0 4px 10px var(--hover-shadow);
+    transform: translateY(-1px);
 }
 
-.btn-primary:hover {
-    box-shadow: 0 6px 15px var(--hover-shadow);
-}
-
-.btn-secondary {
-    background: var(--border);
-    color: var(--text);
-}
-
-.btn-secondary:hover {
-    background: var(--text-light);
+.tool-button.active-tool {
+    background-color: var(--accent-color);
     color: white;
+    box-shadow: 0 0 0 2px var(--secondary-accent);
 }
 
-.btn-danger {
-    background: #ef4444;
-    color: white;
+.color-label, .brush-label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 0.95em;
 }
 
-.btn-like {
-    --danger-color: #ef4444;
-    background: transparent;
-    border: 2px solid var(--danger-color);
-    color: var(--danger-color);
-    padding: 0.5rem 1rem;
+#color-picker {
+    width: 50px;
+    height: 40px;
+    border: none;
     border-radius: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow-dark), var(--shadow-light);
 }
 
-.btn-like.liked {
-    background: var(--danger-color);
+#color-picker:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+#brush-size {
+    width: 100px;
+}
+
+#brush-size-value {
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 25px;
+    text-align: center;
+}
+
+#drawing-canvas {
+    display: block;
+    width: 100%;
+    height: 450px;
+    border: none;
+    border-radius: var(--border-radius);
+    touch-action: none; 
+    background-color: var(--bg-color); 
+    margin-bottom: 15px;
+    box-shadow: var(--inner-shadow);
+    cursor: crosshair;
+}
+
+#drawing-canvas.eraser-mode {
+    cursor: grab;
+}
+
+.canvas-controls {
+    display: flex;
+    justify-content: center;
+}
+
+#clear-canvas {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    background-color: var(--warning-color);
     color: white;
+    cursor: pointer;
+    box-shadow: var(--shadow-dark), var(--shadow-light);
 }
 
-/* --- 6. Modale (Pop-up) --- */
+#clear-canvas:hover {
+    background-color: #d32f2f;
+    transform: translateY(-1px);
+}
 
-.modal {
-    display: none;
+#clear-canvas:focus {
+    outline: 2px solid var(--warning-color);
+    outline-offset: 2px;
+}
+
+/* ========================================================== */
+/* 8. MODALE ET PARAMÈTRES */
+/* ========================================================== */
+#modal-overlay {
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    animation: fadeIn 0.3s ease;
-}
-
-.modal.active {
+    background-color: rgba(0, 0, 0, 0.6); 
+    backdrop-filter: blur(8px); 
+    z-index: 2000;
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: opacity var(--transition-speed);
+}
+
+.hidden-modal {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .modal-content {
-    background: var(--card-bg);
-    padding: 2.5rem;
-    border-radius: 25px;
+    background-color: var(--card-bg);
+    padding: 35px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); 
+    max-width: 500px;
     width: 90%;
-    max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(100px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.close {
+.close-modal-button {
     position: absolute;
-    right: 1rem;
-    top: 1rem;
-    font-size: 1.5rem;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
     cursor: pointer;
-    color: var(--text-light);
-    transition: all 0.3s ease;
-    width: 35px;
-    height: 35px;
+    color: var(--text-color);
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    transition: all 0.2s;
 }
 
-.close:hover {
-    background: var(--border);
-    color: var(--primary);
+.close-modal-button:hover {
+    background-color: var(--warning-color);
+    color: white;
     transform: rotate(90deg);
 }
 
-.close:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
+.close-modal-button:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
-/* --- 7. Formulaires --- */
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.form-group input[type="text"],
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    padding: 0.8rem;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 1rem;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.form-group input[type="text"]:focus,
-.form-group textarea:focus,
-.form-group select:focus,
-.form-group input[type="text"]:focus-visible,
-.form-group textarea:focus-visible,
-.form-group select:focus-visible {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--hover-shadow);
-}
-
-/* Slider (Range Input) */
-.form-group input[type="range"] {
-    width: 100%;
-    height: 8px;
-    border-radius: 5px;
-    background: var(--border);
-    outline: none;
-    -webkit-appearance: none;
-}
-
-.form-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    cursor: pointer;
-    box-shadow: 0 2px 10px var(--hover-shadow);
-    transition: all 0.3s ease;
-}
-
-.form-group input[type="range"]::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--primary);
-    cursor: pointer;
-    box-shadow: 0 2px 10px var(--hover-shadow);
-    border: none;
-}
-
-.form-group input[type="range"]::-webkit-slider-thumb:hover,
-.form-group input[type="range"]::-moz-range-thumb:hover {
-    transform: scale(1.2);
-}
-
-.radio-group {
+.setting-item {
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(153, 153, 153, 0.15);
     display: flex;
-    gap: 1.5rem;
-}
-
-.radio-group label {
-    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
+    font-size: 1.1em;
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item label {
+    font-weight: 500;
+}
+
+.setting-info {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 20px;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Range Slider */
+input[type="range"] {
+    width: 150px;
+    height: 6px;
+    border-radius: 5px;
+    background: var(--bg-color);
+    outline: none;
+    box-shadow: var(--inner-shadow);
     cursor: pointer;
 }
 
-.public-options {
-    display: none;
-    padding: 1rem;
-    background: var(--bg);
-    border-radius: 12px;
-    margin-top: 1rem;
-    animation: fadeIn 0.3s ease;
-    border: 1px solid var(--border);
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    justify-content: flex-end;
-}
-
-.color-picker {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.color-btn {
-    width: 40px;
-    height: 40px;
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 3px solid transparent;
+    background: var(--accent-color);
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px var(--shadow);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
 }
 
-.color-btn:hover {
-    transform: scale(1.15);
-    border-color: var(--primary);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
 }
 
-/* --- 8. Commentaires --- */
-
-.comments-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
 }
 
-.comment {
-    background: var(--bg);
-    padding: 1rem;
-    border-radius: 12px;
-    margin-bottom: 0.8rem;
-    transition: all 0.3s ease;
-    border-left: 3px solid var(--text-light);
+input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.1);
 }
 
-.comment:hover {
-    transform: translateX(3px);
-    box-shadow: 0 3px 10px var(--shadow);
+/* Switch Toggle */
+input[type="checkbox"][role="switch"] {
+    appearance: none;
+    width: 50px;
+    height: 26px;
+    background-color: #ccc;
+    border-radius: 13px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.comment-author {
-    font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 0.3rem;
+input[type="checkbox"][role="switch"]:checked {
+    background-color: var(--accent-color);
 }
 
-.comment-text {
-    color: var(--text-light);
+input[type="checkbox"][role="switch"]:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
-.comment-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+input[type="checkbox"][role="switch"]::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.comment-input {
-    flex: 1;
-    padding: 0.8rem;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: var(--card-bg);
-    color: var(--text);
+input[type="checkbox"][role="switch"]:checked::before {
+    transform: translateX(24px);
 }
 
-/* --- 9. Media Queries (Responsive) --- */
+/* ========================================================== */
+/* 9. FAQ PAGE */
+/* ========================================================== */
+#faq-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
 
-@media (max-width: 992px) {
-    .header-content {
+#faq-content h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+#faq-content h3 {
+    color: var(--accent-color);
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+#faq-content p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.faq-introduction {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-dark), var(--shadow-light);
+}
+
+/* ========================================================== */
+/* 10. RESPONSIVE DESIGN */
+/* ========================================================== */
+@media (max-width: 768px) {
+    #taskbar {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+        gap: 10px;
+    }
+    
+    #logo {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+    
+    #main-nav {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+    
+    .nav-button {
+        width: 100%;
+    }
+    
+    .page-section {
+        padding-top: 180px;
+    }
+    
+    #timer-display {
+        font-size: 4em;
+    }
+    
+    #drawing-canvas {
+        height: 300px;
+    }
+    
+    #timer-controls {
+        flex-direction: column;
+    }
+    
+    #timer-controls button {
+        max-width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 25px;
+    }
+    
+    #audio-controls-group {
         flex-wrap: wrap;
         justify-content: center;
     }
+    
+    #current-track-info {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .drawing-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .tool-group {
+        justify-content: space-between;
+    }
+    
+    .pomodoro-durations {
+        flex-direction: column;
+        gap: 15px;
+    }
 }
 
-@media (max-width: 768px) {
-    h1 {
-        font-size: 1.5rem;
+@media (max-width: 480px) {
+    #logo {
+        font-size: 1.3em;
     }
-
-    .goals-grid {
-        grid-template-columns: 1fr;
+    
+    .card {
+        padding: 20px;
     }
-
-    .nav-btn {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
+    
+    h2 {
+        font-size: 1.3em;
     }
-
-    .modal-content {
-        padding: 1.5rem;
-        width: 95%;
+    
+    #timer-display {
+        font-size: 3em;
+    }
+    
+    input[type="text"], input[type="number"] {
+        font-size: 1em;
+        padding: 12px;
+    }
+    
+    button {
+        font-size: 0.9em;
     }
 }
 
-/* --- 10. Empty State --- */
-
-.empty-state {
-    text-align: center;
-    padding: 4rem;
-    color: var(--text-light);
-    background: var(--card-bg);
-    border-radius: 15px;
-    box-shadow: 0 5px 15px var(--shadow);
-    margin-top: 2rem;
+/* ========================================================== */
+/* 11. ACCESSIBILITÉ */
+/* ========================================================== */
+:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
 }
 
-.empty-state-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.6;
-    color: var(--primary);
-}
+/* Préférence pour réduire les mouvements */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
