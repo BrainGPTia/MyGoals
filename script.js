@@ -1,458 +1,715 @@
-
-// État de l'application
-let goals = [];
-let myLikes = [];
-let myComments = [];
-let currentGoalId = null;
-let currentUser = 'Utilisateur';
-let analytics = null;
-
-// Charger les données au démarrage
-window.addEventListener('DOMContentLoaded', () => {
-    // Initialiser Firebase Analytics si disponible
-    if (typeof firebase !== 'undefined' && firebase.analytics) {
-        analytics = firebase.analytics();
-    }
+document.addEventListener('DOMContentLoaded', () => {
     
-    loadData();
-    setupEventListeners();
-    renderGoals();
-});
+    // ========================================================== //
+    // 1. SÉLECTION DES ÉLÉMENTS DU DOM
+    // ========================================================== //
+    
+    // Global & Navigation
+    const body = document.body;
+    const homeButton = document.getElementById('home-button');
+    const faqButton = document.getElementById('faq-button');
+    const focusPage = document.getElementById('focus-page');
+    const faqPage = document.getElementById('faq-page');
 
-// Configuration des écouteurs d'événements
-function setupEventListeners() {
-    // Navigation principale
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            showSection(btn.dataset.section);
-        });
-    });
+    // Audio Controls
+    const audio = document.getElementById('background-audio');
+    const audioToggleButton = document.getElementById('audio-toggle-button');
+    const nextTrackButton = document.getElementById('next-track-button');
+    const currentTrackInfo = document.getElementById('current-track-info');
+    const volumeSlider = document.getElementById('volume-slider');
 
-    // Navigation secondaire
-    document.querySelectorAll('.secondary-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            showSection(btn.dataset.section);
-        });
-    });
+    // Modale & Paramètres
+    const modalOverlay = document.getElementById('modal-overlay');
+    const closeModalButton = document.querySelector('.close-modal-button');
+    const settingsButton = document.getElementById('settings-button');
+    const themeSwitch = document.getElementById('theme-switch');
+    const animationSwitch = document.getElementById('animation-switch');
 
-    // Bouton nouvel objectif
-    document.getElementById('addGoalBtn').addEventListener('click', () => openModal());
+    // Focus Tools
+    const quoteElement = document.getElementById('motivational-quote');
+    const changeQuoteButton = document.getElementById('change-quote-button');
+    const dailyGoalInput = document.getElementById('daily-goal');
+    const saveGoalButton = document.getElementById('save-goal-button');
+    const newTodoInput = document.getElementById('new-todo');
+    const addTodoButton = document.getElementById('add-todo-button');
+    const todoListElement = document.getElementById('todo-list');
+    const todoCountElement = document.getElementById('todo-count');
+    const timerDisplay = document.getElementById('timer-display');
+    const startTimerButton = document.getElementById('start-timer');
+    const resetTimerButton = document.getElementById('reset-timer');
+    const timerStatus = document.getElementById('timer-status');
+    const sessionCountElement = document.getElementById('session-count');
+    
+    // Pomodoro Durations (dans la carte Pomodoro)
+    const workDurationInline = document.getElementById('work-duration-inline');
+    const breakDurationInline = document.getElementById('break-duration-inline');
+    
+    // Canvas & Drawing Tools
+    const canvas = document.getElementById('drawing-canvas');
+    const clearCanvasButton = document.getElementById('clear-canvas');
+    const toolPencilButton = document.getElementById('tool-pencil');
+    const toolEraserButton = document.getElementById('tool-eraser');
+    const colorPicker = document.getElementById('color-picker');
+    const brushSize = document.getElementById('brush-size');
+    const brushSizeValue = document.getElementById('brush-size-value');
 
-    // Fermeture modale
-    document.querySelectorAll('.close').forEach(btn => {
-        btn.addEventListener('click', closeModals);
-    });
-
-    document.getElementById('cancelBtn').addEventListener('click', closeModals);
-
-    // Soumission formulaire
-    document.getElementById('goalForm').addEventListener('submit', saveGoal);
-
-    // Slider progression
-    document.getElementById('goalProgress').addEventListener('input', (e) => {
-        document.getElementById('progressValue').textContent = e.target.value;
-    });
-
-    // Visibilité publique/privée
-    document.querySelectorAll('input[name="visibility"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            const publicOptions = document.getElementById('publicOptions');
-            publicOptions.style.display = e.target.value === 'public' ? 'block' : 'none';
-        });
-    });
-
-    // Nom affiché
-    document.getElementById('displayName').addEventListener('change', (e) => {
-        const pseudoInput = document.getElementById('pseudoInput');
-        const realNameInput = document.getElementById('realNameInput');
-        pseudoInput.style.display = e.target.value === 'pseudo' ? 'block' : 'none';
-        realNameInput.style.display = e.target.value === 'real' ? 'block' : 'none';
-    });
-
-    // Paramètres
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-        document.getElementById('settingsModal').classList.add('active');
-    });
-
-    document.getElementById('closeSettings').addEventListener('click', closeModals);
-
-    document.getElementById('themeSelect').addEventListener('change', (e) => {
-        document.body.className = e.target.value;
-        saveSettings();
-    });
-
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const color = btn.dataset.color;
-            document.documentElement.style.setProperty('--primary', color);
-            saveSettings();
-        });
-    });
-
-    // Fermeture modale en cliquant à l'extérieur
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeModals();
+    // ========================================================== //
+    // 2. GESTION DES DONNÉES LOCALES
+    // ========================================================== //
+    
+    const loadState = (key, defaultValue) => {
+        try {
+            const stored = localStorage.getItem(key);
+            if (stored === null) return defaultValue;
+            return JSON.parse(stored);
+        } catch (error) {
+            console.warn(`Erreur lors du chargement de ${key}:`, error);
+            return defaultValue;
         }
-    });
-}
+    };
 
-function openModal(goalId = null) {
-    currentGoalId = goalId;
-    const modal = document.getElementById('modal');
-    const form = document.getElementById('goalForm');
+    const saveState = (key, value) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (error) {
+            console.error(`Erreur lors de la sauvegarde de ${key}:`, error);
+        }
+    };
+
+    // ========================================================== //
+    // 3. GESTION DE LA PLAYLIST & AUDIO
+    // ========================================================== //
     
-    if (goalId) {
-        const goal = goals.find(g => g.id === goalId);
-        if (!goal) return;
-        
-        document.getElementById('modalTitle').textContent = '✏️ Modifier l\'objectif';
-        document.getElementById('goalTitle').value = goal.title;
-        document.getElementById('goalDescription').value = goal.description;
-        document.getElementById('goalType').value = goal.type;
-        document.getElementById('goalProgress').value = goal.progress;
-        document.getElementById('progressValue').textContent = goal.progress;
-        document.querySelector(`input[name="visibility"][value="${goal.visibility}"]`).checked = true;
-        
-        if (goal.visibility === 'public') {
-            document.getElementById('publicOptions').style.display = 'block';
-            document.getElementById('displayName').value = goal.displayName;
-            document.getElementById('allowComments').checked = goal.allowComments;
-            
-            if (goal.displayName === 'pseudo') {
-                document.getElementById('pseudoInput').style.display = 'block';
-                document.getElementById('pseudoInput').value = goal.authorName;
-                document.getElementById('realNameInput').style.display = 'none';
-            } else if (goal.displayName === 'real') {
-                document.getElementById('realNameInput').style.display = 'block';
-                document.getElementById('realNameInput').value = goal.authorName;
-                document.getElementById('pseudoInput').style.display = 'none';
-            } else {
-                document.getElementById('pseudoInput').style.display = 'none';
-                document.getElementById('realNameInput').style.display = 'none';
-            }
+    const playlist = [
+        { title: "Calm Focus (Ambiant)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, 
+        { title: "Deep Ambient (Concentration)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }, 
+        { title: "Zen Loop (Minimaliste)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+        { title: "Synthwave Rêveur", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+        { title: "Flow State", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
+    ];
+    
+    let currentTrackIndex = loadState('currentTrackIndex', 0);
+
+    const loadTrack = (index) => {
+        if (index < 0 || index >= playlist.length) {
+            index = 0;
+        }
+        audio.src = playlist[index].url;
+        audio.load();
+        currentTrackIndex = index;
+        saveState('currentTrackIndex', index);
+        updateAudioButtonState();
+    };
+    
+    const updateAudioButtonState = () => {
+        const icon = audio.paused ? 'play' : 'pause';
+        audioToggleButton.innerHTML = `<i class="fas fa-${icon}"></i>`;
+        currentTrackInfo.textContent = playlist[currentTrackIndex].title;
+    };
+
+    const toggleAudio = () => {
+        if (audio.paused) {
+            audio.play().catch(error => {
+                console.error("Erreur de lecture:", error);
+                alert("Le navigateur a bloqué la lecture automatique. Veuillez cliquer à nouveau.");
+            });
         } else {
-            document.getElementById('publicOptions').style.display = 'none';
+            audio.pause();
         }
-    } else {
-        document.getElementById('modalTitle').textContent = '✨ Nouvel Objectif';
-        form.reset();
-        document.getElementById('progressValue').textContent = '0';
-        document.getElementById('publicOptions').style.display = 'none';
-        document.getElementById('pseudoInput').style.display = 'none';
-        document.getElementById('realNameInput').style.display = 'none';
-    }
-    
-    modal.classList.add('active');
-}
+    };
 
-function closeModals() {
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.classList.remove('active');
+    const playNextTrack = () => {
+        const wasPlaying = !audio.paused;
+        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+        loadTrack(currentTrackIndex);
+        if (wasPlaying) {
+            audio.play().catch(error => {
+                console.error("Erreur lors du changement de piste:", error);
+            });
+        }
+    };
+
+    // Initialisation du volume
+    const initialVolume = loadState('audioVolume', 0.5);
+    audio.volume = Math.min(Math.max(initialVolume, 0), 1);
+    
+    if (volumeSlider) {
+        volumeSlider.value = initialVolume;
+        volumeSlider.addEventListener('input', () => {
+            const volume = parseFloat(volumeSlider.value);
+            audio.volume = volume;
+            saveState('audioVolume', volume);
+        });
+    }
+
+    // Event Listeners Audio
+    audioToggleButton.addEventListener('click', toggleAudio);
+    nextTrackButton.addEventListener('click', playNextTrack);
+    audio.addEventListener('ended', playNextTrack);
+    audio.addEventListener('play', updateAudioButtonState);
+    audio.addEventListener('pause', updateAudioButtonState);
+
+    loadTrack(currentTrackIndex);
+
+    // ========================================================== //
+    // 4. GESTION DE LA NAVIGATION (SPA)
+    // ========================================================== //
+
+    const navigateTo = (targetPageElement, sourceButton) => {
+        document.querySelectorAll('.page-section').forEach(page => {
+            page.classList.remove('visible-page-section');
+            page.classList.add('hidden-page-section');
+        });
+
+        targetPageElement.classList.remove('hidden-page-section');
+        targetPageElement.classList.add('visible-page-section');
+
+        document.querySelectorAll('.nav-button').forEach(btn => {
+            btn.classList.remove('active-nav-button');
+        });
+        
+        if (sourceButton) {
+            sourceButton.classList.add('active-nav-button');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    homeButton.addEventListener('click', () => navigateTo(focusPage, homeButton));
+    faqButton.addEventListener('click', () => navigateTo(faqPage, faqButton));
+
+    // ========================================================== //
+    // 5. GESTION DES MODALES ET PARAMÈTRES
+    // ========================================================== //
+
+    const openModal = () => {
+        modalOverlay.classList.remove('hidden-modal');
+        body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+        modalOverlay.classList.add('hidden-modal');
+        body.style.overflow = '';
+    };
+    
+    settingsButton.addEventListener('click', openModal);
+    closeModalButton.addEventListener('click', closeModal);
+    
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            closeModal();
+        }
     });
-    currentGoalId = null;
-}
 
-function saveGoal(e) {
-    e.preventDefault();
-    
-    const title = document.getElementById('goalTitle').value;
-    const description = document.getElementById('goalDescription').value;
-    const type = document.getElementById('goalType').value;
-    const progress = parseInt(document.getElementById('goalProgress').value);
-    const visibility = document.querySelector('input[name="visibility"]:checked').value;
-    const displayName = document.getElementById('displayName').value;
-    const allowComments = document.getElementById('allowComments').checked;
-    
-    let authorName = 'Anonyme';
-    if (visibility === 'public') {
-        if (displayName === 'pseudo') {
-            authorName = document.getElementById('pseudoInput').value || 'Anonyme';
-        } else if (displayName === 'real') {
-            authorName = document.getElementById('realNameInput').value || currentUser;
-        }
+    // Gestion du Thème
+    const currentTheme = loadState('theme', 'light');
+    if (currentTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (themeSwitch) themeSwitch.checked = true;
     }
-    
-    const goal = {
-        id: currentGoalId || Date.now().toString(),
-        title,
-        description,
-        type,
-        progress,
-        visibility,
-        displayName,
-        authorName,
-        allowComments,
-        likes: currentGoalId ? goals.find(g => g.id === currentGoalId).likes : 0,
-        comments: currentGoalId ? goals.find(g => g.id === currentGoalId).comments : [],
-        createdAt: currentGoalId ? goals.find(g => g.id === currentGoalId).createdAt : Date.now()
+
+    if (themeSwitch) {
+        themeSwitch.addEventListener('change', () => {
+            const isDark = themeSwitch.checked;
+            if (isDark) {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+            saveState('theme', isDark ? 'dark' : 'light');
+            if (canvas) setupCanvas();
+        });
+    }
+
+    // Gestion des Animations
+    const toggleAnimations = (enable) => {
+        const value = enable ? '0.25s' : '0s';
+        document.documentElement.style.setProperty('--transition-speed', value);
+        saveState('animationsEnabled', enable);
     };
     
-    if (currentGoalId) {
-        const index = goals.findIndex(g => g.id === currentGoalId);
-        goals[index] = goal;
-    } else {
-        goals.push(goal);
-        // Analytics: suivi nouvel objectif
-        if (analytics) {
-            analytics.logEvent('add_goal', { title, visibility });
+    const animationsEnabled = loadState('animationsEnabled', true);
+    if (animationSwitch) {
+        animationSwitch.checked = animationsEnabled;
+        toggleAnimations(animationsEnabled);
+        animationSwitch.addEventListener('change', () => {
+            toggleAnimations(animationSwitch.checked);
+        });
+    }
+
+    // ========================================================== //
+    // 6. GESTION DU CONTENU (FAQ, Citation, Objectif)
+    // ========================================================== //
+    
+    // FAQ
+    const faqData = [
+        {
+            question: "Qui a créé ce site ?",
+            answer: "Ce site a été conçu par un développeur visant à créer un espace de travail numérique sans distraction, se concentrant uniquement sur l'efficacité des méthodes éprouvées (Pomodoro, To-Do minimaliste)."
+        },
+        {
+            question: "Pourquoi ces fonctionnalités limitées ?",
+            answer: "C'est un choix délibéré pour éviter la surcharge cognitive. Chaque outil sert un but précis : le Minuteur gère le temps, la To-Do gère l'organisation minimale, et la Zone de dessin permet la détente active ou le 'doodling' sans basculer sur une autre application."
+        },
+        {
+            question: "La musique est-elle vraiment libre de droits ?",
+            answer: "Les pistes utilisées sont des URLs de démonstration provenant de sources libres de droits (SoundHelix). Dans une version finale, ces pistes seraient remplacées par des musiques ambient et lo-fi spécifiquement sélectionnées pour la concentration et le relaxement."
+        },
+        {
+            question: "Où sont stockées mes données ?",
+            answer: "Toutes les données (Objectif, To-Do, Thème, Durées Pomodoro) sont stockées exclusivement dans le <strong>localStorage</strong> de votre navigateur. Elles ne quittent jamais votre appareil, garantissant la confidentialité et l'accès instantané."
         }
-    }
-    
-    saveData();
-    renderGoals();
-    closeModals();
-}
+    ];
 
-function deleteGoal(id) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
-        goals = goals.filter(g => g.id !== id);
-        myLikes = myLikes.filter(l => l !== id);
-        myComments = myComments.filter(c => c.goalId !== id);
-        saveData();
-        renderGoals();
-    }
-}
-
-function toggleLike(id) {
-    const goal = goals.find(g => g.id === id);
-    if (!goal) return;
-    
-    const likeIndex = myLikes.indexOf(id);
-    if (likeIndex > -1) {
-        myLikes.splice(likeIndex, 1);
-        goal.likes--;
-    } else {
-        myLikes.push(id);
-        goal.likes++;
-        // Analytics: suivi like
-        if (analytics) {
-            analytics.logEvent('like_goal', { goalId: id });
-        }
-    }
-    
-    saveData();
-    renderGoals();
-}
-
-function addComment(goalId, text) {
-    const goal = goals.find(g => g.id === goalId);
-    if (!goal || !goal.allowComments) return;
-    
-    const comment = {
-        id: Date.now().toString(),
-        goalId,
-        author: currentUser,
-        text,
-        createdAt: Date.now()
+    const renderFAQ = () => {
+        const container = faqPage.querySelector('#faq-content');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="faq-introduction">
+                <h2><i class="fas fa-question-circle"></i> Pourquoi Focus & Zen ?</h2>
+                <p>Cette section détaille la philosophie et les choix de conception derrière Focus & Zen.</p>
+            </div>
+        `;
+        
+        faqData.forEach(item => {
+            const section = document.createElement('div');
+            section.style.marginBottom = '30px';
+            
+            const question = document.createElement('h3');
+            question.innerHTML = `Q: ${item.question}`;
+            
+            const answer = document.createElement('p');
+            answer.innerHTML = `R: ${item.answer}`;
+            
+            section.appendChild(question);
+            section.appendChild(answer);
+            container.appendChild(section);
+        });
     };
     
-    goal.comments.push(comment);
-    myComments.push(comment);
-    // Analytics: suivi commentaire
-    if (analytics) {
-        analytics.logEvent('comment_goal', { goalId });
-    }
-    saveData();
-    renderGoals();
-}
+    renderFAQ();
+    
+    // Citations
+    const quotes = [
+        "La simplicité est la sophistication suprême. - Leonardo da Vinci",
+        "Ne remettez jamais à demain ce que vous pouvez faire après-demain. - Mark Twain",
+        "Le secret pour avancer est de commencer. - Mark Twain",
+        "Concentrez toute votre énergie sur la tâche que vous avez à accomplir. - Bouddha",
+        "Un petit pas vaut mieux qu'une longue méditation. - Proverbe tibétain",
+        "La perfection est atteinte non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer. - Antoine de Saint-Exupéry",
+        "Ce qui compte, ce n'est pas le nombre d'heures que vous mettez dans votre travail, c'est le travail que vous mettez dans vos heures. - Sam Ewing"
+    ];
 
-function showSection(section) {
-    document.querySelectorAll('.goals-section').forEach(s => s.classList.remove('active'));
-    
-    switch(section) {
-        case 'public':
-            document.getElementById('publicSection').classList.add('active');
-            renderPublicGoals();
-            break;
-        case 'private':
-            document.getElementById('privateSection').classList.add('active');
-            renderPrivateGoals();
-            break;
-        case 'comments':
-            document.getElementById('commentsSection').classList.add('active');
-            renderMyComments();
-            break;
-        case 'likes':
-            document.getElementById('likesSection').classList.add('active');
-            renderMyLikes();
-            break;
-    }
-}
+    const displayRandomQuote = () => {
+        if (quoteElement) {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteElement.textContent = quotes[randomIndex];
+        }
+    };
 
-function renderGoals() {
-    const activeSection = document.querySelector('.goals-section.active');
-    if (!activeSection) return;
+    displayRandomQuote();
     
-    const activeSectionId = activeSection.id;
-    
-    if (activeSectionId === 'publicSection') renderPublicGoals();
-    else if (activeSectionId === 'privateSection') renderPrivateGoals();
-    else if (activeSectionId === 'commentsSection') renderMyComments();
-    else if (activeSectionId === 'likesSection') renderMyLikes();
-}
-
-function renderPublicGoals() {
-    const container = document.getElementById('publicGoals');
-    const publicGoals = goals.filter(g => g.visibility === 'public');
-    
-    if (publicGoals.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucun objectif public pour le moment</p></div>';
-        return;
+    if (changeQuoteButton) {
+        changeQuoteButton.addEventListener('click', displayRandomQuote);
     }
     
-    container.innerHTML = publicGoals.map(goal => createGoalCard(goal, true)).join('');
-    attachGoalEventListeners();
-}
+    if (quoteElement) {
+        quoteElement.style.cursor = 'pointer';
+        quoteElement.addEventListener('click', displayRandomQuote);
+    }
 
-function renderPrivateGoals() {
-    const container = document.getElementById('privateGoals');
-    const privateGoals = goals.filter(g => g.visibility === 'private');
+    // Objectif - Apparition du bouton UNIQUEMENT si modification
+    let originalGoalValue = loadState('dailyGoal', '');
     
-    if (privateGoals.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>Aucun objectif privé pour le moment</p></div>';
-        return;
+    const saveGoal = () => {
+        if (!dailyGoalInput || !saveGoalButton) return;
+        
+        const goalValue = dailyGoalInput.value.trim();
+        saveState('dailyGoal', goalValue);
+        originalGoalValue = goalValue; // Met à jour la valeur originale
+        
+        saveGoalButton.classList.add('confirm-save-animation');
+        saveGoalButton.innerHTML = `<i class="fas fa-check"></i> Enregistré !`;
+        
+        setTimeout(() => {
+            saveGoalButton.classList.add('hidden-goal-button');
+            saveGoalButton.innerHTML = `<i class="fas fa-save"></i> Enregistrer`;
+            saveGoalButton.classList.remove('confirm-save-animation');
+        }, 800);
+    };
+    
+    const checkGoalInput = () => {
+        if (!dailyGoalInput || !saveGoalButton) return;
+        
+        const currentValue = dailyGoalInput.value.trim();
+        
+        // Le bouton apparaît SEULEMENT si la valeur a changé par rapport à la valeur sauvegardée
+        if (currentValue !== originalGoalValue) {
+            saveGoalButton.classList.remove('hidden-goal-button');
+        } else {
+            saveGoalButton.classList.add('hidden-goal-button');
+        }
+    };
+    
+    if (dailyGoalInput) {
+        dailyGoalInput.value = originalGoalValue;
+        // Le bouton est caché au démarrage
+        saveGoalButton.classList.add('hidden-goal-button');
+        dailyGoalInput.addEventListener('input', checkGoalInput);
     }
     
-    container.innerHTML = privateGoals.map(goal => createGoalCard(goal, false)).join('');
-    attachGoalEventListeners();
-}
+    if (saveGoalButton) {
+        saveGoalButton.addEventListener('click', saveGoal);
+    }
 
-function renderMyComments() {
-    const container = document.getElementById('myComments');
-    const commentedGoals = goals.filter(g => g.comments.some(c => myComments.find(mc => mc.id === c.id)));
+    // ========================================================== //
+    // 7. LOGIQUE DES FONCTIONNALITÉS (To-Do, Pomodoro, Canvas)
+    // ========================================================== //
     
-    if (commentedGoals.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💬</div><p>Vous n\'avez pas encore commenté</p></div>';
-        return;
+    // a. To-Do List
+    let todos = loadState('todos', []);
+
+    const renderTodos = () => {
+        if (!todoListElement) return;
+        
+        todoListElement.innerHTML = '';
+        
+        todos.forEach((todo, index) => {
+            const li = document.createElement('li');
+            li.className = todo.completed ? 'completed' : '';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.dataset.index = index;
+            checkbox.setAttribute('aria-label', `Marquer "${todo.text}" comme ${todo.completed ? 'non complétée' : 'complétée'}`);
+            
+            const span = document.createElement('span');
+            span.textContent = todo.text;
+            span.dataset.index = index;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&#x2715;';
+            deleteBtn.dataset.index = index;
+            deleteBtn.setAttribute('aria-label', `Supprimer "${todo.text}"`);
+            deleteBtn.title = 'Supprimer la tâche';
+            
+            li.appendChild(checkbox);
+            li.appendChild(span);
+            li.appendChild(deleteBtn);
+            todoListElement.appendChild(li);
+        });
+        
+        if (todoCountElement) {
+            todoCountElement.textContent = todos.length;
+        }
+        
+        saveState('todos', todos);
+    };
+
+    const addTodo = () => {
+        if (!newTodoInput) return;
+        
+        const text = newTodoInput.value.trim();
+        if (text) {
+            todos.unshift({ text: text, completed: false });
+            newTodoInput.value = '';
+            renderTodos();
+        }
+    };
+
+    if (addTodoButton) {
+        addTodoButton.addEventListener('click', addTodo);
     }
     
-    container.innerHTML = commentedGoals.map(goal => createGoalCard(goal, true)).join('');
-    attachGoalEventListeners();
-}
-
-function renderMyLikes() {
-    const container = document.getElementById('myLikes');
-    const likedGoals = goals.filter(g => myLikes.includes(g.id));
-    
-    if (likedGoals.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❤️</div><p>Vous n\'avez pas encore aimé d\'objectifs</p></div>';
-        return;
-    }
-    
-    container.innerHTML = likedGoals.map(goal => createGoalCard(goal, true)).join('');
-    attachGoalEventListeners();
-}
-
-function createGoalCard(goal, isPublic) {
-    const typeLabels = { day: '📅 Jour', week: '📆 Semaine', month: '🗓️ Mois', year: '📊 Année' };
-    const isLiked = myLikes.includes(goal.id);
-    
-    return `
-        <div class="goal-card">
-            <div class="goal-header">
-                <div>
-                    <div class="goal-title">${escapeHtml(goal.title)}</div>
-                    ${isPublic ? `<small style="color: var(--text-light);">Par ${escapeHtml(goal.authorName)}</small>` : ''}
-                </div>
-                <span class="goal-type">${typeLabels[goal.type]}</span>
-            </div>
-            ${goal.description ? `<div class="goal-description">${escapeHtml(goal.description)}</div>` : ''}
-            <div class="progress-container">
-                <div class="progress-label">
-                    <span>Progression</span>
-                    <span><strong>${goal.progress}%</strong></span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${goal.progress}%"></div>
-                </div>
-            </div>
-            <div class="goal-actions">
-                <button class="btn btn-primary" onclick="openModal('${goal.id}')">✏️ Modifier</button>
-                <button class="btn btn-danger" onclick="deleteGoal('${goal.id}')">🗑️ Supprimer</button>
-                ${isPublic ? `
-                    <button class="btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${goal.id}')">
-                        ${isLiked ? '❤️' : '🤍'} ${goal.likes}
-                    </button>
-                ` : ''}
-            </div>
-            ${isPublic && goal.allowComments ? `
-                <div class="comments-section">
-                    <h4>💬 Commentaires (${goal.comments.length})</h4>
-                    ${goal.comments.map(c => `
-                        <div class="comment">
-                            <div class="comment-author">${escapeHtml(c.author)}</div>
-                            <div class="comment-text">${escapeHtml(c.text)}</div>
-                        </div>
-                    `).join('')}
-                    <div class="comment-form">
-                        <input type="text" class="comment-input" placeholder="Ajouter un commentaire..." data-goal="${goal.id}">
-                        <button class="btn btn-primary" onclick="submitComment('${goal.id}')">💬</button>
-                    </div>
-                </div>
-            ` : ''}
-        </div>
-    `;
-}
-
-function submitComment(goalId) {
-    const input = document.querySelector(`input[data-goal="${goalId}"]`);
-    if (input && input.value.trim()) {
-        addComment(goalId, input.value.trim());
-        input.value = '';
-    }
-}
-
-function attachGoalEventListeners() {
-    document.querySelectorAll('.comment-input').forEach(input => {
-        input.addEventListener('keypress', (e) => {
+    if (newTodoInput) {
+        newTodoInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                submitComment(input.dataset.goal);
+                addTodo();
             }
         });
-    });
-}
+    }
+    
+    if (todoListElement) {
+        todoListElement.addEventListener('click', (e) => {
+            const index = e.target.dataset.index;
+            if (index === undefined) return;
+            
+            const idx = parseInt(index);
+            
+            if (e.target.type === 'checkbox' || e.target.tagName === 'SPAN') {
+                todos[idx].completed = !todos[idx].completed;
+            } else if (e.target.tagName === 'BUTTON') {
+                todos.splice(idx, 1);
+            }
+            
+            renderTodos();
+        });
+    }
+    
+    renderTodos();
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+    // b. Minuteur Pomodoro (durées dans la carte)
+    let WORK_DURATION = loadState('workDuration', 25) * 60;
+    let BREAK_DURATION = loadState('breakDuration', 5) * 60;
+    let totalSeconds = WORK_DURATION;
+    let isRunning = false;
+    let intervalId = null;
+    let isWorkSession = true;
+    let sessionsCompleted = loadState('sessionsCompleted', 0);
 
-function saveData() {
-    const data = {
-        goals,
-        myLikes,
-        myComments,
-        theme: document.body.className,
-        primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primary')
-    };
-    localStorage.setItem('goalsTrackerData', JSON.stringify(data));
-}
-
-function loadData() {
-    const saved = localStorage.getItem('goalsTrackerData');
-    if (saved) {
-        const data = JSON.parse(saved);
-        goals = data.goals || [];
-        myLikes = data.myLikes || [];
-        myComments = data.myComments || [];
+    const updatePomodoroSettings = () => {
+        if (!workDurationInline || !breakDurationInline) return;
         
-        if (data.theme) {
-            document.body.className = data.theme;
-            document.getElementById('themeSelect').value = data.theme;
+        const newWorkMin = parseInt(workDurationInline.value);
+        const newBreakMin = parseInt(breakDurationInline.value);
+        
+        if (newWorkMin > 0 && newWorkMin <= 60) {
+            WORK_DURATION = newWorkMin * 60;
+            saveState('workDuration', newWorkMin);
         }
         
-        if (data.primaryColor) {
-            document.documentElement.style.setProperty('--primary', data.primaryColor);
+        if (newBreakMin > 0 && newBreakMin <= 30) {
+            BREAK_DURATION = newBreakMin * 60;
+            saveState('breakDuration', newBreakMin);
+        }
+        
+        if (!isRunning) {
+            resetTimer(true);
+        }
+    };
+
+    const updateDisplay = () => {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        
+        if (timerDisplay) {
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        if (sessionCountElement) {
+            sessionCountElement.textContent = sessionsCompleted;
+        }
+    };
+
+    const updateStatus = () => {
+        if (!timerStatus || !startTimerButton) return;
+        
+        const durationMin = isWorkSession 
+            ? Math.floor(WORK_DURATION / 60) 
+            : Math.floor(BREAK_DURATION / 60);
+        
+        if (isWorkSession) {
+            timerStatus.textContent = isRunning 
+                ? 'FOCUS : Travail en cours' 
+                : `Prêt pour Focus (${durationMin} min)`;
+            startTimerButton.innerHTML = isRunning 
+                ? '<i class="fas fa-pause"></i> Pause' 
+                : '<i class="fas fa-play"></i> Démarrer Focus';
+        } else {
+            timerStatus.textContent = isRunning 
+                ? 'PAUSE : Détente active' 
+                : `Prêt pour Pause (${durationMin} min)`;
+            startTimerButton.innerHTML = isRunning 
+                ? '<i class="fas fa-pause"></i> Pause' 
+                : '<i class="fas fa-play"></i> Démarrer Pause';
+        }
+    };
+
+    const countdown = () => {
+        totalSeconds--;
+        
+        if (totalSeconds < 0) {
+            clearInterval(intervalId);
+            
+            if (isWorkSession) {
+                sessionsCompleted++;
+                saveState('sessionsCompleted', sessionsCompleted);
+            }
+            
+            const message = isWorkSession 
+                ? "⏰ Temps de Focus terminé ! C'est l'heure de la pause." 
+                : "⏰ Pause terminée ! Reprenons le travail.";
+            
+            alert(message);
+            
+            isWorkSession = !isWorkSession;
+            totalSeconds = isWorkSession ? WORK_DURATION : BREAK_DURATION;
+            intervalId = setInterval(countdown, 1000);
+        }
+        
+        updateDisplay();
+        updateStatus();
+    };
+
+    const toggleTimer = () => {
+        isRunning = !isRunning;
+        
+        if (isRunning) {
+            intervalId = setInterval(countdown, 1000);
+        } else {
+            clearInterval(intervalId);
+        }
+        
+        updateStatus();
+    };
+
+    const resetTimer = (toWork = true) => {
+        clearInterval(intervalId);
+        isRunning = false;
+        isWorkSession = toWork;
+        totalSeconds = isWorkSession ? WORK_DURATION : BREAK_DURATION;
+        updateDisplay();
+        updateStatus();
+    };
+
+    // Initialisation Pomodoro avec les inputs inline
+    if (workDurationInline && breakDurationInline) {
+        workDurationInline.value = loadState('workDuration', 25);
+        breakDurationInline.value = loadState('breakDuration', 5);
+        
+        // Mise à jour dynamique des durées
+        workDurationInline.addEventListener('change', updatePomodoroSettings);
+        breakDurationInline.addEventListener('change', updatePomodoroSettings);
+        
+        resetTimer(true);
+    }
+
+    if (startTimerButton) {
+        startTimerButton.addEventListener('click', toggleTimer);
+    }
+    
+    if (resetTimerButton) {
+        resetTimerButton.addEventListener('click', () => resetTimer(true));
+    }
+
+    // c. Zone de Dessin avec Outils (Crayon/Gomme + Couleur)
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentTool = 'pencil'; // 'pencil' ou 'eraser'
+        let currentColor = loadState('drawingColor', '#333333');
+        let currentBrushSize = loadState('brushSize', 3);
+
+        const setupCanvas = () => {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            ctx.fillStyle = body.classList.contains('dark-mode') ? '#212932' : '#f0f3f6';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            updateDrawingStyle();
+        };
+
+        const updateDrawingStyle = () => {
+            if (currentTool === 'pencil') {
+                ctx.strokeStyle = currentColor;
+                ctx.globalCompositeOperation = 'source-over';
+                canvas.classList.remove('eraser-mode');
+            } else {
+                ctx.strokeStyle = body.classList.contains('dark-mode') ? '#212932' : '#f0f3f6';
+                ctx.globalCompositeOperation = 'destination-out';
+                canvas.classList.add('eraser-mode');
+            }
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = currentBrushSize;
+        };
+
+        setupCanvas();
+        window.addEventListener('resize', setupCanvas);
+        
+        // Gestion des outils
+        if (toolPencilButton) {
+            toolPencilButton.addEventListener('click', () => {
+                currentTool = 'pencil';
+                toolPencilButton.classList.add('active-tool');
+                toolEraserButton.classList.remove('active-tool');
+                updateDrawingStyle();
+            });
+        }
+        
+        if (toolEraserButton) {
+            toolEraserButton.addEventListener('click', () => {
+                currentTool = 'eraser';
+                toolEraserButton.classList.add('active-tool');
+                toolPencilButton.classList.remove('active-tool');
+                updateDrawingStyle();
+            });
+        }
+        
+        // Gestion de la couleur
+        if (colorPicker) {
+            colorPicker.value = currentColor;
+            colorPicker.addEventListener('input', (e) => {
+                currentColor = e.target.value;
+                saveState('drawingColor', currentColor);
+                if (currentTool === 'pencil') {
+                    ctx.strokeStyle = currentColor;
+                }
+            });
+        }
+        
+        // Gestion de la taille du pinceau
+        if (brushSize && brushSizeValue) {
+            brushSize.value = currentBrushSize;
+            brushSizeValue.textContent = currentBrushSize;
+            
+            brushSize.addEventListener('input', (e) => {
+                currentBrushSize = parseInt(e.target.value);
+                brushSizeValue.textContent = currentBrushSize;
+                ctx.lineWidth = currentBrushSize;
+                saveState('brushSize', currentBrushSize);
+            });
+        }
+        
+        const getCoords = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            return [clientX - rect.left, clientY - rect.top];
+        };
+        
+        const draw = (e) => {
+            if (!isDrawing) return;
+            
+            const [currentX, currentY] = getCoords(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+            [lastX, lastY] = [currentX, currentY];
+        };
+
+        const startDrawing = (e) => {
+            isDrawing = true;
+            [lastX, lastY] = getCoords(e);
+            e.preventDefault();
+        };
+
+        const stopDrawing = () => {
+            isDrawing = false;
+        };
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+        
+        if (clearCanvasButton) {
+            clearCanvasButton.addEventListener('click', setupCanvas);
         }
     }
-}
-
-function saveSettings() {
-    saveData();
-}
+    
+    // ========================================================== //
+    // 8. FINALISATION
+    // ========================================================== //
+    
+    console.log('✅ Focus & Zen initialisé avec succès !');
+});
