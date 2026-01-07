@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    audioToggleButton.addEventListener('click', toggleAudio);
-    nextTrackButton.addEventListener('click', playNextTrack);
+    if (audioToggleButton) audioToggleButton.addEventListener('click', toggleAudio);
+    if (nextTrackButton) nextTrackButton.addEventListener('click', playNextTrack);
     audio.addEventListener('ended', playNextTrack);
     audio.addEventListener('play', updateAudioButtonState);
     audio.addEventListener('pause', updateAudioButtonState);
@@ -174,15 +174,19 @@ document.addEventListener('DOMContentLoaded', function() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    homeButton.addEventListener('click', function() {
-        console.log('Navigation: Accueil');
-        navigateTo(focusPage, homeButton);
-    });
+    if (homeButton) {
+        homeButton.addEventListener('click', function() {
+            console.log('Navigation: Accueil');
+            navigateTo(focusPage, homeButton);
+        });
+    }
     
-    faqButton.addEventListener('click', function() {
-        console.log('Navigation: FAQ');
-        navigateTo(faqPage, faqButton);
-    });
+    if (faqButton) {
+        faqButton.addEventListener('click', function() {
+            console.log('Navigation: FAQ');
+            navigateTo(faqPage, faqButton);
+        });
+    }
 
     console.log('✅ Navigation initialisée');
 
@@ -191,30 +195,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================================== //
 
     function openModal() {
-        modalOverlay.classList.remove('hidden-modal');
+        if (modalOverlay) modalOverlay.classList.remove('hidden-modal');
         body.style.overflow = 'hidden';
     }
 
     function closeModal() {
-        modalOverlay.classList.add('hidden-modal');
+        if (modalOverlay) modalOverlay.classList.add('hidden-modal');
         body.style.overflow = '';
     }
     
-    settingsButton.addEventListener('click', function() {
-        console.log('Ouverture paramètres');
-        openModal();
-    });
+    if (settingsButton) {
+        settingsButton.addEventListener('click', function() {
+            console.log('Ouverture paramètres');
+            openModal();
+        });
+    }
     
-    closeModalButton.addEventListener('click', function() {
-        console.log('Fermeture paramètres');
-        closeModal();
-    });
-    
-    modalOverlay.addEventListener('click', function(e) {
-        if (e.target === modalOverlay) {
+    if (closeModalButton) {
+        closeModalButton.addEventListener('click', function() {
+            console.log('Fermeture paramètres');
             closeModal();
-        }
-    });
+        });
+    }
+    
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    }
 
     // Thème
     var currentTheme = loadState('theme', 'light');
@@ -233,11 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             saveState('theme', isDark ? 'dark' : 'light');
             console.log('Thème changé:', isDark ? 'sombre' : 'clair');
-            
-            // Redessiner le canvas avec la nouvelle couleur de fond
-            if (canvas && typeof setupCanvas === 'function') {
-                setupCanvas();
-            }
         });
     }
 
@@ -283,6 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     function renderFAQ() {
+        if (!faqPage) return;
         var container = faqPage.querySelector('#faq-content');
         if (!container) return;
         
@@ -379,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function() {
             checkbox.type = 'checkbox';
             checkbox.checked = todo.completed;
             checkbox.dataset.index = i;
-            checkbox.setAttribute('aria-label', 'Marquer "' + todo.text + '" comme ' + (todo.completed ? 'non complétée' : 'complétée'));
             
             var span = document.createElement('span');
             span.textContent = todo.text;
@@ -388,8 +393,6 @@ document.addEventListener('DOMContentLoaded', function() {
             var deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '&#x2715;';
             deleteBtn.dataset.index = i;
-            deleteBtn.setAttribute('aria-label', 'Supprimer "' + todo.text + '"');
-            deleteBtn.title = 'Supprimer la tâche';
             deleteBtn.type = 'button';
             
             li.appendChild(checkbox);
@@ -442,9 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (e.target.type === 'checkbox' || e.target.tagName === 'SPAN') {
                 todos[idx].completed = !todos[idx].completed;
-                console.log('Tâche modifiée:', todos[idx].text);
             } else if (e.target.tagName === 'BUTTON') {
-                console.log('Tâche supprimée:', todos[idx].text);
                 todos.splice(idx, 1);
             }
             
@@ -572,36 +573,24 @@ document.addEventListener('DOMContentLoaded', function() {
         totalSeconds = isWorkSession ? WORK_DURATION : BREAK_DURATION;
         updateDisplay();
         updateStatus();
-        console.log('Timer réinitialisé');
     }
 
     if (workDurationInline && breakDurationInline) {
         workDurationInline.value = loadState('workDuration', 25);
         breakDurationInline.value = loadState('breakDuration', 5);
         
-        workDurationInline.addEventListener('change', function() {
-            console.log('Durée travail changée');
-            updatePomodoroSettings();
-        });
-        
-        breakDurationInline.addEventListener('change', function() {
-            console.log('Durée pause changée');
-            updatePomodoroSettings();
-        });
+        workDurationInline.addEventListener('change', updatePomodoroSettings);
+        breakDurationInline.addEventListener('change', updatePomodoroSettings);
         
         resetTimer(true);
     }
 
     if (startTimerButton) {
-        startTimerButton.addEventListener('click', function() {
-            console.log('Clic démarrer/pause timer');
-            toggleTimer();
-        });
+        startTimerButton.addEventListener('click', toggleTimer);
     }
     
     if (resetTimerButton) {
         resetTimerButton.addEventListener('click', function() {
-            console.log('Clic réinitialiser timer');
             resetTimer(true);
         });
     }
@@ -635,11 +624,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentTool === 'pencil') {
                 ctx.strokeStyle = currentColor;
                 ctx.globalCompositeOperation = 'source-over';
-                canvas.classList.remove('eraser-mode');
+                if (canvas) canvas.classList.remove('eraser-mode');
             } else {
                 ctx.strokeStyle = body.classList.contains('dark-mode') ? '#212932' : '#f0f3f6';
                 ctx.globalCompositeOperation = 'destination-out';
-                canvas.classList.add('eraser-mode');
+                if (canvas) canvas.classList.add('eraser-mode');
             }
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
@@ -653,9 +642,8 @@ document.addEventListener('DOMContentLoaded', function() {
             toolPencilButton.addEventListener('click', function() {
                 currentTool = 'pencil';
                 toolPencilButton.classList.add('active-tool');
-                toolEraserButton.classList.remove('active-tool');
+                if (toolEraserButton) toolEraserButton.classList.remove('active-tool');
                 updateDrawingStyle();
-                console.log('Outil: crayon');
             });
         }
         
@@ -663,9 +651,8 @@ document.addEventListener('DOMContentLoaded', function() {
             toolEraserButton.addEventListener('click', function() {
                 currentTool = 'eraser';
                 toolEraserButton.classList.add('active-tool');
-                toolPencilButton.classList.remove('active-tool');
+                if (toolPencilButton) toolPencilButton.classList.remove('active-tool');
                 updateDrawingStyle();
-                console.log('Outil: gomme');
             });
         }
         
@@ -736,18 +723,11 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.addEventListener('touchend', stopDrawing);
         
         if (clearCanvasButton) {
-            clearCanvasButton.addEventListener('click', function() {
-                console.log('Canvas effacé');
-                setupCanvas();
-            });
+            clearCanvasButton.addEventListener('click', setupCanvas);
         }
 
         console.log('✅ Canvas initialisé');
     }
-    
-    // ========================================================== //
-    // FINALISATION
-    // ========================================================== //
     
     console.log('✅✅✅ Focus & Zen complètement initialisé !');
 });
