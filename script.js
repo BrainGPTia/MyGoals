@@ -1,96 +1,94 @@
-document.addEventListener('DOMContentLoaded', () => {
+console.log('🚀 Chargement de Focus & Zen...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM chargé, initialisation...');
     
     // ========================================================== //
     // 1. SÉLECTION DES ÉLÉMENTS DU DOM
     // ========================================================== //
     
-    // Global & Navigation
-    const body = document.body;
-    const homeButton = document.getElementById('home-button');
-    const faqButton = document.getElementById('faq-button');
-    const focusPage = document.getElementById('focus-page');
-    const faqPage = document.getElementById('faq-page');
+    var body = document.body;
+    var homeButton = document.getElementById('home-button');
+    var faqButton = document.getElementById('faq-button');
+    var focusPage = document.getElementById('focus-page');
+    var faqPage = document.getElementById('faq-page');
 
-    // Audio Controls
-    const audio = document.getElementById('background-audio');
-    const audioToggleButton = document.getElementById('audio-toggle-button');
-    const nextTrackButton = document.getElementById('next-track-button');
-    const currentTrackInfo = document.getElementById('current-track-info');
-    const volumeSlider = document.getElementById('volume-slider');
+    var audio = document.getElementById('background-audio');
+    var audioToggleButton = document.getElementById('audio-toggle-button');
+    var nextTrackButton = document.getElementById('next-track-button');
+    var currentTrackInfo = document.getElementById('current-track-info');
+    var volumeSlider = document.getElementById('volume-slider');
 
-    // Modale & Paramètres
-    const modalOverlay = document.getElementById('modal-overlay');
-    const closeModalButton = document.querySelector('.close-modal-button');
-    const settingsButton = document.getElementById('settings-button');
-    const themeSwitch = document.getElementById('theme-switch');
-    const animationSwitch = document.getElementById('animation-switch');
+    var modalOverlay = document.getElementById('modal-overlay');
+    var closeModalButton = document.querySelector('.close-modal-button');
+    var settingsButton = document.getElementById('settings-button');
+    var themeSwitch = document.getElementById('theme-switch');
+    var animationSwitch = document.getElementById('animation-switch');
 
-    // Focus Tools
-    const quoteElement = document.getElementById('motivational-quote');
-    const changeQuoteButton = document.getElementById('change-quote-button');
-    const dailyGoalInput = document.getElementById('daily-goal');
-    const saveGoalButton = document.getElementById('save-goal-button');
-    const newTodoInput = document.getElementById('new-todo');
-    const addTodoButton = document.getElementById('add-todo-button');
-    const todoListElement = document.getElementById('todo-list');
-    const todoCountElement = document.getElementById('todo-count');
-    const timerDisplay = document.getElementById('timer-display');
-    const startTimerButton = document.getElementById('start-timer');
-    const resetTimerButton = document.getElementById('reset-timer');
-    const timerStatus = document.getElementById('timer-status');
-    const sessionCountElement = document.getElementById('session-count');
+    var quoteElement = document.getElementById('motivational-quote');
+    var changeQuoteButton = document.getElementById('change-quote-button');
+    var dailyGoalInput = document.getElementById('daily-goal');
+    var newTodoInput = document.getElementById('new-todo');
+    var addTodoButton = document.getElementById('add-todo-button');
+    var todoListElement = document.getElementById('todo-list');
+    var todoCountElement = document.getElementById('todo-count');
     
-    // Pomodoro Durations (dans la carte Pomodoro)
-    const workDurationInline = document.getElementById('work-duration-inline');
-    const breakDurationInline = document.getElementById('break-duration-inline');
+    var timerDisplay = document.getElementById('timer-display');
+    var startTimerButton = document.getElementById('start-timer');
+    var resetTimerButton = document.getElementById('reset-timer');
+    var timerStatus = document.getElementById('timer-status');
+    var sessionCountElement = document.getElementById('session-count');
+    var workDurationInline = document.getElementById('work-duration-inline');
+    var breakDurationInline = document.getElementById('break-duration-inline');
     
-    // Canvas & Drawing Tools
-    const canvas = document.getElementById('drawing-canvas');
-    const clearCanvasButton = document.getElementById('clear-canvas');
-    const toolPencilButton = document.getElementById('tool-pencil');
-    const toolEraserButton = document.getElementById('tool-eraser');
-    const colorPicker = document.getElementById('color-picker');
-    const brushSize = document.getElementById('brush-size');
-    const brushSizeValue = document.getElementById('brush-size-value');
+    var canvas = document.getElementById('drawing-canvas');
+    var clearCanvasButton = document.getElementById('clear-canvas');
+    var toolPencilButton = document.getElementById('tool-pencil');
+    var toolEraserButton = document.getElementById('tool-eraser');
+    var colorPicker = document.getElementById('color-picker');
+    var brushSize = document.getElementById('brush-size');
+    var brushSizeValue = document.getElementById('brush-size-value');
+
+    console.log('✅ Éléments DOM sélectionnés');
 
     // ========================================================== //
     // 2. GESTION DES DONNÉES LOCALES
     // ========================================================== //
     
-    const loadState = (key, defaultValue) => {
+    function loadState(key, defaultValue) {
         try {
-            const stored = localStorage.getItem(key);
+            var stored = localStorage.getItem(key);
             if (stored === null) return defaultValue;
             return JSON.parse(stored);
         } catch (error) {
-            console.warn(`Erreur lors du chargement de ${key}:`, error);
+            console.warn('Erreur chargement ' + key + ':', error);
             return defaultValue;
         }
-    };
+    }
 
-    const saveState = (key, value) => {
+    function saveState(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
         } catch (error) {
-            console.error(`Erreur lors de la sauvegarde de ${key}:`, error);
+            console.error('Erreur sauvegarde ' + key + ':', error);
         }
-    };
+    }
 
     // ========================================================== //
     // 3. GESTION DE LA PLAYLIST & AUDIO
     // ========================================================== //
     
-    const playlist = [
-        { title: "Calm Focus (Ambiant)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, 
-        { title: "Deep Ambient (Concentration)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }, 
-        { title: "Zen Loop (Minimaliste)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
-        { title: "Synthwave Rêveur", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    var playlist = [
+        { title: "Calm Focus", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, 
+        { title: "Deep Ambient", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" }, 
+        { title: "Zen Loop", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+        { title: "Synthwave", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
         { title: "Flow State", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
     ];
     
-    let currentTrackIndex = loadState('currentTrackIndex', 0);
+    var currentTrackIndex = loadState('currentTrackIndex', 0);
 
-    const loadTrack = (index) => {
+    function loadTrack(index) {
         if (index < 0 || index >= playlist.length) {
             index = 0;
         }
@@ -99,50 +97,48 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTrackIndex = index;
         saveState('currentTrackIndex', index);
         updateAudioButtonState();
-    };
+    }
     
-    const updateAudioButtonState = () => {
-        const icon = audio.paused ? 'play' : 'pause';
-        audioToggleButton.innerHTML = `<i class="fas fa-${icon}"></i>`;
+    function updateAudioButtonState() {
+        var icon = audio.paused ? 'play' : 'pause';
+        audioToggleButton.innerHTML = '<i class="fas fa-' + icon + '"></i>';
         currentTrackInfo.textContent = playlist[currentTrackIndex].title;
-    };
+    }
 
-    const toggleAudio = () => {
+    function toggleAudio() {
         if (audio.paused) {
-            audio.play().catch(error => {
-                console.error("Erreur de lecture:", error);
-                alert("Le navigateur a bloqué la lecture automatique. Veuillez cliquer à nouveau.");
+            audio.play().catch(function(error) {
+                console.error("Erreur lecture:", error);
+                alert("Le navigateur a bloqué la lecture. Cliquez à nouveau.");
             });
         } else {
             audio.pause();
         }
-    };
+    }
 
-    const playNextTrack = () => {
-        const wasPlaying = !audio.paused;
+    function playNextTrack() {
+        var wasPlaying = !audio.paused;
         currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
         loadTrack(currentTrackIndex);
         if (wasPlaying) {
-            audio.play().catch(error => {
-                console.error("Erreur lors du changement de piste:", error);
+            audio.play().catch(function(error) {
+                console.error("Erreur changement piste:", error);
             });
         }
-    };
+    }
 
-    // Initialisation du volume
-    const initialVolume = loadState('audioVolume', 0.5);
+    var initialVolume = loadState('audioVolume', 0.5);
     audio.volume = Math.min(Math.max(initialVolume, 0), 1);
     
     if (volumeSlider) {
         volumeSlider.value = initialVolume;
-        volumeSlider.addEventListener('input', () => {
-            const volume = parseFloat(volumeSlider.value);
+        volumeSlider.addEventListener('input', function() {
+            var volume = parseFloat(volumeSlider.value);
             audio.volume = volume;
             saveState('audioVolume', volume);
         });
     }
 
-    // Event Listeners Audio
     audioToggleButton.addEventListener('click', toggleAudio);
     nextTrackButton.addEventListener('click', playNextTrack);
     audio.addEventListener('ended', playNextTrack);
@@ -150,99 +146,124 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.addEventListener('pause', updateAudioButtonState);
 
     loadTrack(currentTrackIndex);
+    console.log('✅ Audio initialisé');
 
     // ========================================================== //
-    // 4. GESTION DE LA NAVIGATION (SPA)
+    // 4. GESTION DE LA NAVIGATION
     // ========================================================== //
 
-    const navigateTo = (targetPageElement, sourceButton) => {
-        document.querySelectorAll('.page-section').forEach(page => {
-            page.classList.remove('visible-page-section');
-            page.classList.add('hidden-page-section');
-        });
+    function navigateTo(targetPageElement, sourceButton) {
+        var allPages = document.querySelectorAll('.page-section');
+        for (var i = 0; i < allPages.length; i++) {
+            allPages[i].classList.remove('visible-page-section');
+            allPages[i].classList.add('hidden-page-section');
+        }
 
         targetPageElement.classList.remove('hidden-page-section');
         targetPageElement.classList.add('visible-page-section');
 
-        document.querySelectorAll('.nav-button').forEach(btn => {
-            btn.classList.remove('active-nav-button');
-        });
+        var allButtons = document.querySelectorAll('.nav-button');
+        for (var i = 0; i < allButtons.length; i++) {
+            allButtons[i].classList.remove('active-nav-button');
+        }
         
         if (sourceButton) {
             sourceButton.classList.add('active-nav-button');
         }
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    }
 
-    homeButton.addEventListener('click', () => navigateTo(focusPage, homeButton));
-    faqButton.addEventListener('click', () => navigateTo(faqPage, faqButton));
+    homeButton.addEventListener('click', function() {
+        console.log('Navigation: Accueil');
+        navigateTo(focusPage, homeButton);
+    });
+    
+    faqButton.addEventListener('click', function() {
+        console.log('Navigation: FAQ');
+        navigateTo(faqPage, faqButton);
+    });
+
+    console.log('✅ Navigation initialisée');
 
     // ========================================================== //
-    // 5. GESTION DES MODALES ET PARAMÈTRES
+    // 5. GESTION DES MODALES
     // ========================================================== //
 
-    const openModal = () => {
+    function openModal() {
         modalOverlay.classList.remove('hidden-modal');
         body.style.overflow = 'hidden';
-    };
+    }
 
-    const closeModal = () => {
+    function closeModal() {
         modalOverlay.classList.add('hidden-modal');
         body.style.overflow = '';
-    };
+    }
     
-    settingsButton.addEventListener('click', openModal);
-    closeModalButton.addEventListener('click', closeModal);
+    settingsButton.addEventListener('click', function() {
+        console.log('Ouverture paramètres');
+        openModal();
+    });
     
-    modalOverlay.addEventListener('click', (e) => {
+    closeModalButton.addEventListener('click', function() {
+        console.log('Fermeture paramètres');
+        closeModal();
+    });
+    
+    modalOverlay.addEventListener('click', function(e) {
         if (e.target === modalOverlay) {
             closeModal();
         }
     });
 
-    // Gestion du Thème
-    const currentTheme = loadState('theme', 'light');
+    // Thème
+    var currentTheme = loadState('theme', 'light');
     if (currentTheme === 'dark') {
         body.classList.add('dark-mode');
         if (themeSwitch) themeSwitch.checked = true;
     }
 
     if (themeSwitch) {
-        themeSwitch.addEventListener('change', () => {
-            const isDark = themeSwitch.checked;
+        themeSwitch.addEventListener('change', function() {
+            var isDark = themeSwitch.checked;
             if (isDark) {
                 body.classList.add('dark-mode');
             } else {
                 body.classList.remove('dark-mode');
             }
             saveState('theme', isDark ? 'dark' : 'light');
-            if (canvas) setupCanvas();
+            console.log('Thème changé:', isDark ? 'sombre' : 'clair');
+            
+            // Redessiner le canvas avec la nouvelle couleur de fond
+            if (canvas && typeof setupCanvas === 'function') {
+                setupCanvas();
+            }
         });
     }
 
-    // Gestion des Animations
-    const toggleAnimations = (enable) => {
-        const value = enable ? '0.25s' : '0s';
+    // Animations
+    function toggleAnimations(enable) {
+        var value = enable ? '0.25s' : '0s';
         document.documentElement.style.setProperty('--transition-speed', value);
         saveState('animationsEnabled', enable);
-    };
+    }
     
-    const animationsEnabled = loadState('animationsEnabled', true);
+    var animationsEnabled = loadState('animationsEnabled', true);
     if (animationSwitch) {
         animationSwitch.checked = animationsEnabled;
         toggleAnimations(animationsEnabled);
-        animationSwitch.addEventListener('change', () => {
+        animationSwitch.addEventListener('change', function() {
             toggleAnimations(animationSwitch.checked);
         });
     }
 
+    console.log('✅ Paramètres initialisés');
+
     // ========================================================== //
-    // 6. GESTION DU CONTENU (FAQ, Citation, Objectif)
+    // 6. FAQ
     // ========================================================== //
     
-    // FAQ
-    const faqData = [
+    var faqData = [
         {
             question: "Qui a créé ce site ?",
             answer: "Ce site a été conçu par un développeur visant à créer un espace de travail numérique sans distraction, se concentrant uniquement sur l'efficacité des méthodes éprouvées (Pomodoro, To-Do minimaliste)."
@@ -261,37 +282,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    const renderFAQ = () => {
-        const container = faqPage.querySelector('#faq-content');
+    function renderFAQ() {
+        var container = faqPage.querySelector('#faq-content');
         if (!container) return;
         
-        container.innerHTML = `
-            <div class="faq-introduction">
-                <h2><i class="fas fa-question-circle"></i> Pourquoi Focus & Zen ?</h2>
-                <p>Cette section détaille la philosophie et les choix de conception derrière Focus & Zen.</p>
-            </div>
-        `;
+        container.innerHTML = '<div class="faq-introduction"><h2><i class="fas fa-question-circle"></i> Pourquoi Focus & Zen ?</h2><p>Cette section détaille la philosophie et les choix de conception derrière Focus & Zen.</p></div>';
         
-        faqData.forEach(item => {
-            const section = document.createElement('div');
+        for (var i = 0; i < faqData.length; i++) {
+            var item = faqData[i];
+            var section = document.createElement('div');
             section.style.marginBottom = '30px';
             
-            const question = document.createElement('h3');
-            question.innerHTML = `Q: ${item.question}`;
+            var question = document.createElement('h3');
+            question.innerHTML = 'Q: ' + item.question;
             
-            const answer = document.createElement('p');
-            answer.innerHTML = `R: ${item.answer}`;
+            var answer = document.createElement('p');
+            answer.innerHTML = 'R: ' + item.answer;
             
             section.appendChild(question);
             section.appendChild(answer);
             container.appendChild(section);
-        });
-    };
+        }
+    }
     
     renderFAQ();
+
+    // ========================================================== //
+    // 7. CITATIONS
+    // ========================================================== //
     
-    // Citations
-    const quotes = [
+    var quotes = [
         "La simplicité est la sophistication suprême. - Leonardo da Vinci",
         "Ne remettez jamais à demain ce que vous pouvez faire après-demain. - Mark Twain",
         "Le secret pour avancer est de commencer. - Mark Twain",
@@ -301,17 +321,20 @@ document.addEventListener('DOMContentLoaded', () => {
         "Ce qui compte, ce n'est pas le nombre d'heures que vous mettez dans votre travail, c'est le travail que vous mettez dans vos heures. - Sam Ewing"
     ];
 
-    const displayRandomQuote = () => {
+    function displayRandomQuote() {
         if (quoteElement) {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
+            var randomIndex = Math.floor(Math.random() * quotes.length);
             quoteElement.textContent = quotes[randomIndex];
         }
-    };
+    }
 
     displayRandomQuote();
     
     if (changeQuoteButton) {
-        changeQuoteButton.addEventListener('click', displayRandomQuote);
+        changeQuoteButton.addEventListener('click', function() {
+            console.log('Changement de citation');
+            displayRandomQuote();
+        });
     }
     
     if (quoteElement) {
@@ -319,112 +342,90 @@ document.addEventListener('DOMContentLoaded', () => {
         quoteElement.addEventListener('click', displayRandomQuote);
     }
 
-    // Objectif - Apparition du bouton UNIQUEMENT si modification
-    let originalGoalValue = loadState('dailyGoal', '');
-    
-    const saveGoal = () => {
-        if (!dailyGoalInput || !saveGoalButton) return;
-        
-        const goalValue = dailyGoalInput.value.trim();
-        saveState('dailyGoal', goalValue);
-        originalGoalValue = goalValue; // Met à jour la valeur originale
-        
-        saveGoalButton.classList.add('confirm-save-animation');
-        saveGoalButton.innerHTML = `<i class="fas fa-check"></i> Enregistré !`;
-        
-        setTimeout(() => {
-            saveGoalButton.classList.add('hidden-goal-button');
-            saveGoalButton.innerHTML = `<i class="fas fa-save"></i> Enregistrer`;
-            saveGoalButton.classList.remove('confirm-save-animation');
-        }, 800);
-    };
-    
-    const checkGoalInput = () => {
-        if (!dailyGoalInput || !saveGoalButton) return;
-        
-        const currentValue = dailyGoalInput.value.trim();
-        
-        // Le bouton apparaît SEULEMENT si la valeur a changé par rapport à la valeur sauvegardée
-        if (currentValue !== originalGoalValue) {
-            saveGoalButton.classList.remove('hidden-goal-button');
-        } else {
-            saveGoalButton.classList.add('hidden-goal-button');
-        }
-    };
+    console.log('✅ Citations initialisées');
+
+    // ========================================================== //
+    // 8. OBJECTIF - SAUVEGARDE AUTOMATIQUE
+    // ========================================================== //
     
     if (dailyGoalInput) {
-        dailyGoalInput.value = originalGoalValue;
-        // Le bouton est caché au démarrage
-        saveGoalButton.classList.add('hidden-goal-button');
-        dailyGoalInput.addEventListener('input', checkGoalInput);
-    }
-    
-    if (saveGoalButton) {
-        saveGoalButton.addEventListener('click', saveGoal);
+        var savedGoal = loadState('dailyGoal', '');
+        dailyGoalInput.value = savedGoal;
+        
+        dailyGoalInput.addEventListener('input', function() {
+            saveState('dailyGoal', dailyGoalInput.value.trim());
+        });
     }
 
+    console.log('✅ Objectif initialisé');
+
     // ========================================================== //
-    // 7. LOGIQUE DES FONCTIONNALITÉS (To-Do, Pomodoro, Canvas)
+    // 9. TO-DO LIST
     // ========================================================== //
     
-    // a. To-Do List
-    let todos = loadState('todos', []);
+    var todos = loadState('todos', []);
 
-    const renderTodos = () => {
+    function renderTodos() {
         if (!todoListElement) return;
         
         todoListElement.innerHTML = '';
         
-        todos.forEach((todo, index) => {
-            const li = document.createElement('li');
+        for (var i = 0; i < todos.length; i++) {
+            var todo = todos[i];
+            var li = document.createElement('li');
             li.className = todo.completed ? 'completed' : '';
             
-            const checkbox = document.createElement('input');
+            var checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = todo.completed;
-            checkbox.dataset.index = index;
-            checkbox.setAttribute('aria-label', `Marquer "${todo.text}" comme ${todo.completed ? 'non complétée' : 'complétée'}`);
+            checkbox.dataset.index = i;
+            checkbox.setAttribute('aria-label', 'Marquer "' + todo.text + '" comme ' + (todo.completed ? 'non complétée' : 'complétée'));
             
-            const span = document.createElement('span');
+            var span = document.createElement('span');
             span.textContent = todo.text;
-            span.dataset.index = index;
+            span.dataset.index = i;
             
-            const deleteBtn = document.createElement('button');
+            var deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '&#x2715;';
-            deleteBtn.dataset.index = index;
-            deleteBtn.setAttribute('aria-label', `Supprimer "${todo.text}"`);
+            deleteBtn.dataset.index = i;
+            deleteBtn.setAttribute('aria-label', 'Supprimer "' + todo.text + '"');
             deleteBtn.title = 'Supprimer la tâche';
+            deleteBtn.type = 'button';
             
             li.appendChild(checkbox);
             li.appendChild(span);
             li.appendChild(deleteBtn);
             todoListElement.appendChild(li);
-        });
+        }
         
         if (todoCountElement) {
             todoCountElement.textContent = todos.length;
         }
         
         saveState('todos', todos);
-    };
+    }
 
-    const addTodo = () => {
+    function addTodo() {
         if (!newTodoInput) return;
         
-        const text = newTodoInput.value.trim();
+        var text = newTodoInput.value.trim();
         if (text) {
             todos.unshift({ text: text, completed: false });
             newTodoInput.value = '';
             renderTodos();
+            console.log('Tâche ajoutée:', text);
         }
-    };
+    }
 
     if (addTodoButton) {
-        addTodoButton.addEventListener('click', addTodo);
+        addTodoButton.addEventListener('click', function() {
+            console.log('Clic bouton ajouter tâche');
+            addTodo();
+        });
     }
     
     if (newTodoInput) {
-        newTodoInput.addEventListener('keypress', (e) => {
+        newTodoInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addTodo();
             }
@@ -432,15 +433,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (todoListElement) {
-        todoListElement.addEventListener('click', (e) => {
-            const index = e.target.dataset.index;
-            if (index === undefined) return;
+        todoListElement.addEventListener('click', function(e) {
+            var index = e.target.dataset.index;
+            if (index === undefined || index === null) return;
             
-            const idx = parseInt(index);
+            var idx = parseInt(index);
+            if (isNaN(idx) || idx < 0 || idx >= todos.length) return;
             
             if (e.target.type === 'checkbox' || e.target.tagName === 'SPAN') {
                 todos[idx].completed = !todos[idx].completed;
+                console.log('Tâche modifiée:', todos[idx].text);
             } else if (e.target.tagName === 'BUTTON') {
+                console.log('Tâche supprimée:', todos[idx].text);
                 todos.splice(idx, 1);
             }
             
@@ -449,21 +453,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     renderTodos();
+    console.log('✅ To-Do initialisée');
 
-    // b. Minuteur Pomodoro (durées dans la carte)
-    let WORK_DURATION = loadState('workDuration', 25) * 60;
-    let BREAK_DURATION = loadState('breakDuration', 5) * 60;
-    let totalSeconds = WORK_DURATION;
-    let isRunning = false;
-    let intervalId = null;
-    let isWorkSession = true;
-    let sessionsCompleted = loadState('sessionsCompleted', 0);
+    // ========================================================== //
+    // 10. MINUTEUR POMODORO
+    // ========================================================== //
+    
+    var WORK_DURATION = loadState('workDuration', 25) * 60;
+    var BREAK_DURATION = loadState('breakDuration', 5) * 60;
+    var totalSeconds = WORK_DURATION;
+    var isRunning = false;
+    var intervalId = null;
+    var isWorkSession = true;
+    var sessionsCompleted = loadState('sessionsCompleted', 0);
 
-    const updatePomodoroSettings = () => {
+    function updatePomodoroSettings() {
         if (!workDurationInline || !breakDurationInline) return;
         
-        const newWorkMin = parseInt(workDurationInline.value);
-        const newBreakMin = parseInt(breakDurationInline.value);
+        var newWorkMin = parseInt(workDurationInline.value);
+        var newBreakMin = parseInt(breakDurationInline.value);
         
         if (newWorkMin > 0 && newWorkMin <= 60) {
             WORK_DURATION = newWorkMin * 60;
@@ -478,46 +486,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isRunning) {
             resetTimer(true);
         }
-    };
+    }
 
-    const updateDisplay = () => {
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
+    function updateDisplay() {
+        var minutes = Math.floor(totalSeconds / 60);
+        var seconds = totalSeconds % 60;
         
         if (timerDisplay) {
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timerDisplay.textContent = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
         }
         
         if (sessionCountElement) {
             sessionCountElement.textContent = sessionsCompleted;
         }
-    };
+    }
 
-    const updateStatus = () => {
+    function updateStatus() {
         if (!timerStatus || !startTimerButton) return;
         
-        const durationMin = isWorkSession 
+        var durationMin = isWorkSession 
             ? Math.floor(WORK_DURATION / 60) 
             : Math.floor(BREAK_DURATION / 60);
         
         if (isWorkSession) {
             timerStatus.textContent = isRunning 
                 ? 'FOCUS : Travail en cours' 
-                : `Prêt pour Focus (${durationMin} min)`;
+                : 'Prêt pour Focus (' + durationMin + ' min)';
             startTimerButton.innerHTML = isRunning 
                 ? '<i class="fas fa-pause"></i> Pause' 
                 : '<i class="fas fa-play"></i> Démarrer Focus';
         } else {
             timerStatus.textContent = isRunning 
                 ? 'PAUSE : Détente active' 
-                : `Prêt pour Pause (${durationMin} min)`;
+                : 'Prêt pour Pause (' + durationMin + ' min)';
             startTimerButton.innerHTML = isRunning 
                 ? '<i class="fas fa-pause"></i> Pause' 
                 : '<i class="fas fa-play"></i> Démarrer Pause';
         }
-    };
+    }
 
-    const countdown = () => {
+    function countdown() {
         totalSeconds--;
         
         if (totalSeconds < 0) {
@@ -528,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveState('sessionsCompleted', sessionsCompleted);
             }
             
-            const message = isWorkSession 
+            var message = isWorkSession 
                 ? "⏰ Temps de Focus terminé ! C'est l'heure de la pause." 
                 : "⏰ Pause terminée ! Reprenons le travail.";
             
@@ -541,10 +549,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         updateDisplay();
         updateStatus();
-    };
+    }
 
-    const toggleTimer = () => {
+    function toggleTimer() {
         isRunning = !isRunning;
+        console.log('Timer:', isRunning ? 'démarré' : 'pausé');
         
         if (isRunning) {
             intervalId = setInterval(countdown, 1000);
@@ -553,48 +562,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         updateStatus();
-    };
+    }
 
-    const resetTimer = (toWork = true) => {
+    function resetTimer(toWork) {
+        if (toWork === undefined) toWork = true;
         clearInterval(intervalId);
         isRunning = false;
         isWorkSession = toWork;
         totalSeconds = isWorkSession ? WORK_DURATION : BREAK_DURATION;
         updateDisplay();
         updateStatus();
-    };
+        console.log('Timer réinitialisé');
+    }
 
-    // Initialisation Pomodoro avec les inputs inline
     if (workDurationInline && breakDurationInline) {
         workDurationInline.value = loadState('workDuration', 25);
         breakDurationInline.value = loadState('breakDuration', 5);
         
-        // Mise à jour dynamique des durées
-        workDurationInline.addEventListener('change', updatePomodoroSettings);
-        breakDurationInline.addEventListener('change', updatePomodoroSettings);
+        workDurationInline.addEventListener('change', function() {
+            console.log('Durée travail changée');
+            updatePomodoroSettings();
+        });
+        
+        breakDurationInline.addEventListener('change', function() {
+            console.log('Durée pause changée');
+            updatePomodoroSettings();
+        });
         
         resetTimer(true);
     }
 
     if (startTimerButton) {
-        startTimerButton.addEventListener('click', toggleTimer);
+        startTimerButton.addEventListener('click', function() {
+            console.log('Clic démarrer/pause timer');
+            toggleTimer();
+        });
     }
     
     if (resetTimerButton) {
-        resetTimerButton.addEventListener('click', () => resetTimer(true));
+        resetTimerButton.addEventListener('click', function() {
+            console.log('Clic réinitialiser timer');
+            resetTimer(true);
+        });
     }
 
-    // c. Zone de Dessin avec Outils (Crayon/Gomme + Couleur)
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-        let currentTool = 'pencil'; // 'pencil' ou 'eraser'
-        let currentColor = loadState('drawingColor', '#333333');
-        let currentBrushSize = loadState('brushSize', 3);
+    console.log('✅ Pomodoro initialisé');
 
-        const setupCanvas = () => {
+    // ========================================================== //
+    // 11. ZONE DE DESSIN
+    // ========================================================== //
+    
+    if (canvas) {
+        var ctx = canvas.getContext('2d');
+        var isDrawing = false;
+        var lastX = 0;
+        var lastY = 0;
+        var currentTool = 'pencil';
+        var currentColor = loadState('drawingColor', '#333333');
+        var currentBrushSize = loadState('brushSize', 3);
+
+        function setupCanvas() {
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
             
@@ -602,9 +629,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             updateDrawingStyle();
-        };
+        }
 
-        const updateDrawingStyle = () => {
+        function updateDrawingStyle() {
             if (currentTool === 'pencil') {
                 ctx.strokeStyle = currentColor;
                 ctx.globalCompositeOperation = 'source-over';
@@ -617,34 +644,34 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
             ctx.lineWidth = currentBrushSize;
-        };
+        }
 
         setupCanvas();
         window.addEventListener('resize', setupCanvas);
         
-        // Gestion des outils
         if (toolPencilButton) {
-            toolPencilButton.addEventListener('click', () => {
+            toolPencilButton.addEventListener('click', function() {
                 currentTool = 'pencil';
                 toolPencilButton.classList.add('active-tool');
                 toolEraserButton.classList.remove('active-tool');
                 updateDrawingStyle();
+                console.log('Outil: crayon');
             });
         }
         
         if (toolEraserButton) {
-            toolEraserButton.addEventListener('click', () => {
+            toolEraserButton.addEventListener('click', function() {
                 currentTool = 'eraser';
                 toolEraserButton.classList.add('active-tool');
                 toolPencilButton.classList.remove('active-tool');
                 updateDrawingStyle();
+                console.log('Outil: gomme');
             });
         }
         
-        // Gestion de la couleur
         if (colorPicker) {
             colorPicker.value = currentColor;
-            colorPicker.addEventListener('input', (e) => {
+            colorPicker.addEventListener('input', function(e) {
                 currentColor = e.target.value;
                 saveState('drawingColor', currentColor);
                 if (currentTool === 'pencil') {
@@ -653,12 +680,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Gestion de la taille du pinceau
         if (brushSize && brushSizeValue) {
             brushSize.value = currentBrushSize;
             brushSizeValue.textContent = currentBrushSize;
             
-            brushSize.addEventListener('input', (e) => {
+            brushSize.addEventListener('input', function(e) {
                 currentBrushSize = parseInt(e.target.value);
                 brushSizeValue.textContent = currentBrushSize;
                 ctx.lineWidth = currentBrushSize;
@@ -666,33 +692,40 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        const getCoords = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        function getCoords(e) {
+            var rect = canvas.getBoundingClientRect();
+            var clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            var clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
             return [clientX - rect.left, clientY - rect.top];
-        };
+        }
         
-        const draw = (e) => {
+        function draw(e) {
             if (!isDrawing) return;
             
-            const [currentX, currentY] = getCoords(e);
+            var coords = getCoords(e);
+            var currentX = coords[0];
+            var currentY = coords[1];
+            
             ctx.beginPath();
             ctx.moveTo(lastX, lastY);
             ctx.lineTo(currentX, currentY);
             ctx.stroke();
-            [lastX, lastY] = [currentX, currentY];
-        };
+            
+            lastX = currentX;
+            lastY = currentY;
+        }
 
-        const startDrawing = (e) => {
+        function startDrawing(e) {
             isDrawing = true;
-            [lastX, lastY] = getCoords(e);
+            var coords = getCoords(e);
+            lastX = coords[0];
+            lastY = coords[1];
             e.preventDefault();
-        };
+        }
 
-        const stopDrawing = () => {
+        function stopDrawing() {
             isDrawing = false;
-        };
+        }
 
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
@@ -703,13 +736,18 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.addEventListener('touchend', stopDrawing);
         
         if (clearCanvasButton) {
-            clearCanvasButton.addEventListener('click', setupCanvas);
+            clearCanvasButton.addEventListener('click', function() {
+                console.log('Canvas effacé');
+                setupCanvas();
+            });
         }
+
+        console.log('✅ Canvas initialisé');
     }
     
     // ========================================================== //
-    // 8. FINALISATION
+    // FINALISATION
     // ========================================================== //
     
-    console.log('✅ Focus & Zen initialisé avec succès !');
+    console.log('✅✅✅ Focus & Zen complètement initialisé !');
 });
